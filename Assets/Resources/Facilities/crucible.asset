@@ -1,0 +1,59 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 18c6b12b92521044392c4270341c94df, type: 3}
+  m_Name: crucible
+  m_EditorClassIdentifier: 
+  FacilityId: crucible
+  DisplayName: Crucible
+  Description: A dark chamber where choice becomes irreversible power.
+  FacilityType: 3
+  FacilityRole: SACRIFICE
+  FacilityEmotion: A dark chamber where choice becomes irreversible power.
+  MaxLevel: 10
+  StartingLevel: 1
+  GoldCostPerLevel:
+  - 600
+  - 900
+  - 1200
+  - 1500
+  - 1800
+  - 2100
+  - 2400
+  - 2700
+  - 3000
+  - 3300
+  GemCostPerLevel:
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  BenefitPerLevel:
+  - 6
+  - 9
+  - 12
+  - 15
+  - 18
+  - 21
+  - 24
+  - 27
+  - 30
+  - 33
+  UpgradeTimeBase: 60
+  UpgradeTimeMultiplier: 1.25
+  FacilityIcon: {fileID: 0}
+  FacilityColor: {r: 0.65, g: 0.2, b: 0.25, a: 1}

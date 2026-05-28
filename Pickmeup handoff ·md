@@ -1,0 +1,287 @@
+# DEVELOPMENT HANDOFF DOCUMENT
+## Pick Me Up — Infinite Gacha (Unity 6)
+**Last Updated:** Session 3 Complete
+**Target Platform:** Android Mobile (Portrait 1080x2340, Samsung Galaxy A34)
+**Unity Version:** Unity 6 (UGUI / Legacy UI)
+**Code Generation:** Qwen 3.7 Max
+**Code Editing:** Antigravity (Claude Sonnet)
+**Auditor:** Claude (reviews all code before Unity import)
+
+---
+
+## WORKFLOW RULE
+**Claude audits every file before it goes into Unity. No exceptions.**
+Order: Qwen generates → Claude audits → Gemini applies to Unity → test
+
+---
+
+## ARCHITECTURE
+
+### Pattern
+Service Locator via `ServiceRegistry` (DontDestroyOnLoad singleton)
+All UI built procedurally via Editor scripts — zero manual Inspector wiring
+No DOTween — Coroutines only
+No 3D models — 2D sprites only
+
+### Scene Structure
+| Scene | Index | Status | Purpose |
+|-------|-------|--------|---------|
+| Boot | 0 | ✅ Done | Loads services, checks save, routes to Hub |
+| Hub | 1 | ✅ Done | Main lobby, navigation, currency display |
+| Summon | 2 | ⚠️ Code Done / Wiring Pending | Full screen gacha experience |
+| Roster | 3 | 🔲 Next | Hero collection and detail view |
+| Tower | - | 🔲 Pending | Combat/floor system (build last) |
+
+---
+
+## COMPLETED FILES
+
+### Assets/Scripts/Core/
+| File | Status | Notes |
+|------|--------|-------|
+| `GameSaveData.cs` | ✅ | Master save class. Contains Gold, Gems, AttributeStones, List<HeroInstance>, PityData |
+| `HeroInstance.cs` | ✅ | Serializable hero runtime data. GUID InstanceId, IsAlive, HiddenPotential (randomized 0-1 on summon), Morale (randomized 40-60 on summon), PersonalityTrait, AcquiredTimestamp as ticks |
+| `HeroDefinition.cs` | ✅ | ScriptableObject. Static hero data. HeroId, HeroName, BaseStarRank, HeroClass enum, BaseHP/ATK/DEF, PortraitSpritePath, CardFrameSpritePath |
+| `BootLoader.cs` | ✅ | MonoBehaviour on Boot scene. Registers all services then loads Hub scene |
+
+### Assets/Scripts/Services/
+| File | Status | Notes |
+|------|--------|-------|
+| `ServiceRegistry.cs` | ✅ | Singleton, DontDestroyOnLoad, Dictionary<Type, object> |
+| `ISaveLoadService.cs` | ✅ | Interface: Save(GameSaveData), Load() |
+| `SaveLoadService.cs` | ✅ | Saves JSON to Application.persistentDataPath/pickmeup_save.json |
+| `GameStateService.cs` | ✅ | Holds live GameSaveData in memory. Has Save() method |
+| `ICurrencyService.cs` | ✅ | Interface: GetGold/Gems/Stones, SpendGold/Gems (returns bool), AddGold/Gems/Stones |
+| `CurrencyService.cs` | ✅ | Reads/writes GameStateService.Data. Saves on every operation |
+| `IGachaService.cs` | ✅ | Interface: SummonStandard/Premium (single+x10), GetPity() |
+| `GachaService.cs` | ✅ | Weighted RNG, dual banner, pity counters. Uses HeroRoster to load defs from Resources/Heroes/ |
+| `IRosterService.cs` | ✅ | Interface for roster queries |
+| `RosterService.cs` | ✅ | Queries GameSaveData.Heroes, filters alive/dead, sorts |
+
+### Assets/Scripts/UI/
+| File | Status | Notes |
+|------|--------|-------|
+| `HubView.cs` | ✅ | MonoBehaviour. Resolves ICurrencyService, displays Gold+Gems via TMP labels. Has RefreshUI() |
+| `SummonView.cs` | ✅ | Full-screen summon overlay. 3-phase card reveal: crack open → card drop+shake → card flip+star pop |
+
+### Assets/Scripts/Editor/
+| File | Status | Notes |
+|------|--------|-------|
+| `ProjectSetupTool.cs` | ✅ | Menu: Tools > Pick Me Up > Setup Project. Creates Boot+Hub scenes, wires BootLoader, sets Build Settings |
+| `SetupHubUI.cs` | ✅ | Menu: Tools > Pick Me Up > Setup Hub UI. Builds Hub canvas procedurally: TopBar (Gold/Gems), CenterArea, BottomDock (5 buttons) |
+| `SetupSummonUI.cs` | ✅ | Menu: Tools > Pick Me Up > Setup Summon UI. Builds full Summon canvas: Standard+Premium panels, tab buttons, card reveal panel, crack overlay, auto-wires SummonView |
+
+---
+
+## ⚠️ PENDING WIRING (do before testing Summon)
+
+### 1. Create Summon Scene in Unity
+- Create empty scene called exactly `Summon`
+- Add to Build Settings at index 2
+- Open it, run **Tools > Pick Me Up > Setup Summon UI**
+
+### 2. Wire Hub SUMMON Button → Summon Scene
+The SUMMON button in Hub was created by `SetupHubUI.cs` but has no onClick listener.
+Add a `HubNavigator.cs` MonoBehaviour to HubCanvas or use this editor script:
+```csharp
+// Quick fix — add this onClick in SetupHubUI or a new HubNavigator.cs
+summonButton.onClick.AddListener(() => SceneManager.LoadScene("Summon"));
+```
+**Best approach:** Create `HubNavigator.cs` (see NEXT after Roster)
+
+### 3. Create HeroDefinitions (ScriptableObjects)
+- In Unity: right-click in `Assets/ScriptableObjects/Heroes/` → Create > PickMeUp > Hero Definition
+- Create one for each hero in the roster table below
+- **HeroId must exactly match the filename** (e.g. `HeroId = "han_israt"`, file = `han_israt.asset`)
+- Place portrait sprites in `Resources/Heroes/` — filename must match `PortraitSpritePath` field
+
+### 4. Add starIconPrefab to SummonView
+- Create a simple Image GameObject (32x32, star sprite or ★ text)
+- Make it a Prefab in `Assets/Resources/UI/`
+- Drag to the `Star Icon Prefab` slot on SummonCanvas → SummonView component
+
+---
+
+## ENUMS
+
+```csharp
+public enum HeroClass
+{ Vanguard, Scout, Mage, Berserker, Assassin, Support, Specialist }
+
+public enum PersonalityTrait
+{ Brave, Cowardly, Reckless, Disciplined, Loyal, Traumatized }
+```
+
+---
+
+## SERVICE REGISTRATION ORDER (BootLoader.cs)
+1. ServiceRegistry (auto-created if missing)
+2. ISaveLoadService → SaveLoadService
+3. GameSaveData (loaded from disk)
+4. GameStateService (holds live data)
+5. ICurrencyService → CurrencyService
+6. IGachaService → GachaService
+7. SceneManager.LoadScene("Hub")
+
+---
+
+## DATA RULES (from manhwa — never break these)
+- No duplicate heroes ever — every summon is a unique individual
+- Permadeath is permanent — IsAlive=false, no revival
+- Synthesis is murder — UI must feel solemn and wrong
+- Starting Morale on summon = 40-60 randomized (heroes arrive traumatized)
+- HiddenPotential never shown as a number — flavor text only:
+  - 0.0–0.3 → "This unit's ceiling appears limited."
+  - 0.3–0.7 → "Something stirs beneath the surface."
+  - 0.7–1.0 → "The System struggles to quantify this unit."
+- Training refines skills only — does NOT increase stats
+- System cannot see: hidden skills, emotional state, hero conspiracies
+
+---
+
+## HERO ROSTER (ScriptableObjects to Create — HeroId = filename, no spaces)
+| Name | HeroId | Star | Class | Trait |
+|------|--------|------|-------|-------|
+| Han Israt | `han_israt` | 1★ | Scout | Disciplined |
+| Jenna Shirai | `jenna_shirai` | 1★ | Assassin | Brave |
+| Aaron Delkard | `aaron_delkard` | 1★ | Vanguard | Disciplined |
+| Belquist | `belquist` | 4★ | Berserker | Reckless |
+| Nerissa | `nerissa` | 4★ | Assassin | Disciplined |
+| Iolka | `iolka` | 4★ | Mage | Brave |
+| Kishasha | `kishasha` | 4★ | Berserker | Reckless |
+| Edith | `edith` | 4★ | Vanguard | Loyal |
+| Katio | `katio` | 4★ | Support | Traumatized |
+
+---
+
+## CURRENCY SYSTEM
+| Currency | Type | Use |
+|----------|------|-----|
+| Gold | Standard | Normal summons (1,000 single / 9,000 x10) |
+| Gems | Premium | Premium summons (300 single / 2,700 x10) |
+| AttributeStones | Resource | Hero Promotion |
+
+---
+
+## GACHA RATES
+| Banner | 1★ | 2★ | 3★ | 4★ | 5★ | Soft Pity | Hard Pity |
+|--------|-----|-----|-----|------|------|-----------|-----------|
+| Standard (Gold) | 60% | 25% | 12% | 2.5% | 0.5% | 90 (4★+) | 180 (5★) |
+| Premium (Gems)  | 40% | 30% | 18% | 9%   | 3%   | 50 (4★+) | 100 (5★) |
+
+---
+
+## HUB UI STRUCTURE
+```
+HubCanvas (Screen Space Overlay, 1080x2340)
+├── TopBar
+│   ├── GoldLabel (TMP, left)
+│   └── GemsLabel (TMP, right)
+├── CenterArea (dark panel, future content)
+└── BottomDock (HorizontalLayoutGroup)
+    ├── ROSTER button  ← needs onClick → LoadScene("Roster")
+    ├── SYNTH button   ← future
+    ├── TRAIN button   ← future
+    ├── TOWER button   ← future
+    └── SUMMON button  ← needs onClick → LoadScene("Summon")  ⚠️ PENDING
+```
+
+---
+
+## SUMMON UI STRUCTURE
+```
+SummonCanvas (Screen Space Overlay, sort order 10, 1080x2340)
+├── Background (dark panel)
+├── TopBar
+│   ├── GoldLabel
+│   └── GemsLabel
+├── BannerTabs
+│   ├── StandardTab  → shows StandardPanel
+│   └── PremiumTab   → shows PremiumPanel
+├── StandardPanel
+│   ├── PityStandardLabel
+│   ├── SummonStandardBtn    (×1 — 1,000 Gold)
+│   └── SummonStandardTenBtn (×10 — 9,000 Gold)
+├── PremiumPanel (hidden by default)
+│   ├── PityPremiumLabel
+│   ├── SummonPremiumBtn     (×1 — 300 Gems)
+│   └── SummonPremiumTenBtn  (×10 — 2,700 Gems)
+├── CardRevealPanel (SetActive false by default)
+│   ├── CrackOverlay (full screen rarity-tinted flash)
+│   ├── CardRoot
+│   │   ├── CardFrame    (rarity tint applied at runtime)
+│   │   ├── CardPortrait (Resources.Load from PortraitSpritePath)
+│   │   ├── NameBanner
+│   │   │   ├── CardNameLabel  (◄ HERO NAME ►)
+│   │   │   └── CardClassLabel
+│   │   └── StarsContainer (HorizontalLayoutGroup, stars popped in one-by-one)
+│   └── TapToContinueLabel
+└── BackBtn → LoadScene("Hub")
+```
+
+---
+
+## NEXT STEP — Roster Scene
+
+### What to build:
+1. `IRosterService.cs` + `RosterService.cs` — queries GameSaveData.Heroes, filters alive/dead, sorts
+2. `RosterView.cs` — scrollable grid of hero cards, detail panel on tap
+3. `HeroCard.cs` — single card MonoBehaviour (portrait, stars, name, DEAD overlay)
+4. `SetupRosterUI.cs` — Editor script procedurally builds Roster UI
+5. `HubNavigator.cs` — wires all Hub bottom dock buttons to correct scenes
+
+### Roster UI Layout:
+```
+RosterCanvas
+├── TopBar (Gold / Gems / Back button)
+├── FilterBar (All | Alive | Dead tabs)
+├── ScrollView
+│   └── Content (GridLayoutGroup — 2 columns)
+│       └── HeroCard × N (portrait, stars, name, DEAD overlay if dead)
+└── DetailPanel (slides up on card tap)
+    ├── HeroPortrait (large)
+    ├── HeroName, Class, StarRank
+    ├── Stats (HP / ATK / DEF from HeroDefinition)
+    ├── Morale bar
+    ├── HiddenPotential flavor text
+    ├── PersonalityTrait
+    └── AcquiredDate
+```
+
+### HeroCard visual rules:
+- 2-column grid, card ratio 2:3
+- Living hero: full color portrait, rarity-tinted frame
+- Dead hero: desaturated portrait + red "DEAD" overlay text
+- Tapping card opens DetailPanel (slides up, does not navigate away)
+
+---
+
+## KNOWN ISSUES / WATCH OUT FOR
+- `SummonView.ShowAffordError` is a Debug.LogWarning placeholder — needs a UI toast later.
+- `Resources.Load` for sprites is a Unity anti-pattern — acceptable for now, migrate to Addressables later
+- Object pooling needed for Roster (200+ heroes will lag without it) — use ScrollRect + manual pool
+- Card portrait renders dark if Image component color is not pure white (255,255,255,255)
+- Dead hero "DEAD" overlay must reset in SetupCard() when pooling — or it bleeds to living heroes
+- Always run `Tools > Pick Me Up > Setup [X] UI` from the correct scene (Hub open when running Setup Hub UI)
+- `starIconPrefab` on SummonView is not wired by editor script — must be done manually in Inspector
+
+---
+
+## FOLDER STRUCTURE
+```
+Assets/
+├── Scripts/
+│   ├── Core/
+│   ├── Services/
+│   ├── UI/
+│   └── Editor/
+├── Scenes/
+│   ├── Boot.unity
+│   ├── Hub.unity
+│   └── Summon.unity      ← create this
+├── ScriptableObjects/
+│   └── Heroes/           ← HeroDefinition .asset files go here
+└── Resources/
+    ├── Heroes/            ← portrait sprites go here (filename = PortraitSpritePath)
+    └── UI/                ← card frames, icons, starIconPrefab go here
+```

@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1045 &1
+EditorBuildSettings:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Scenes:
+  - enabled: 1
+    path: Assets/Scenes/Boot.unity
+    guid: 190d6d5dc41fdd245902a6c6341bafa4
+  - enabled: 1
+    path: Assets/Scenes/Hub.unity
+    guid: 5a9d3962a63ff5841a5725e98fa71ec8
+  - enabled: 1
+    path: Assets/Scenes/Summon.unity
+    guid: 5d9577eff5b3bc2418f4c13e932ab343
+  - enabled: 1
+    path: Assets/Scenes/Roster.unity
+    guid: 22176db0183fd2a4dba30bfce780036f
+  - enabled: 1
+    path: Assets/Scenes/Tower.unity
+    guid: 3f817483aca15b54396457275cf1cc83
+  - enabled: 1
+    path: Assets/Scenes/Dungeon.unity
+    guid: f3b7c36b963a8b94e9a6346e966f0ab4
+  - enabled: 1
+    path: Assets/Scenes/Inventory.unity
+    guid: fb17dbaef32c72f48b8c97b2fdfad6f1
+  - enabled: 1
+    path: Assets/Scenes/MemorialHall.unity
+    guid: f58aa3b2863ecb34ba7674b168f17e34
+  - enabled: 1
+    path: Assets/Scenes/Facilities.unity
+    guid: aa96bfa7b63c72d449d3702519e3391f
+  - enabled: 1
+    path: Assets/Scenes/SynthesisLab.unity
+    guid: 46a64277adc2cee49a31427ba257a08d
+  m_configObjects:
+    com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
+  m_UseUCBPForAssetBundles: 0

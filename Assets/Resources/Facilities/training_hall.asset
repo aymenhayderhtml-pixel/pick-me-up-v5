@@ -1,0 +1,59 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 18c6b12b92521044392c4270341c94df, type: 3}
+  m_Name: training_hall
+  m_EditorClassIdentifier: 
+  FacilityId: training_hall
+  DisplayName: Training Hall
+  Description: A hall of drills, trials, and hard-earned preparation.
+  FacilityType: 4
+  FacilityRole: GROWTH
+  FacilityEmotion: A hall of drills, trials, and hard-earned preparation.
+  MaxLevel: 10
+  StartingLevel: 1
+  GoldCostPerLevel:
+  - 250
+  - 375
+  - 500
+  - 625
+  - 750
+  - 875
+  - 1000
+  - 1125
+  - 1250
+  - 1375
+  GemCostPerLevel:
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  BenefitPerLevel:
+  - 12
+  - 18
+  - 24
+  - 30
+  - 36
+  - 42
+  - 48
+  - 54
+  - 60
+  - 66
+  UpgradeTimeBase: 60
+  UpgradeTimeMultiplier: 1.25
+  FacilityIcon: {fileID: 0}
+  FacilityColor: {r: 0.25, g: 0.6, b: 0.75, a: 1}

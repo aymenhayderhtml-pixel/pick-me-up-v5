@@ -1,0 +1,59 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 18c6b12b92521044392c4270341c94df, type: 3}
+  m_Name: memorial_hall
+  m_EditorClassIdentifier: 
+  FacilityId: memorial_hall
+  DisplayName: Memorial Hall
+  Description: The dead remain present here as Echoes.
+  FacilityType: 6
+  FacilityRole: LEGACY
+  FacilityEmotion: The dead remain present here as Echoes.
+  MaxLevel: 10
+  StartingLevel: 1
+  GoldCostPerLevel:
+  - 600
+  - 900
+  - 1200
+  - 1500
+  - 1800
+  - 2100
+  - 2400
+  - 2700
+  - 3000
+  - 3300
+  GemCostPerLevel:
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  BenefitPerLevel:
+  - 4
+  - 6
+  - 8
+  - 10
+  - 12
+  - 14
+  - 16
+  - 18
+  - 20
+  - 22
+  UpgradeTimeBase: 60
+  UpgradeTimeMultiplier: 1.25
+  FacilityIcon: {fileID: 0}
+  FacilityColor: {r: 0.45, g: 0.35, b: 0.55, a: 1}

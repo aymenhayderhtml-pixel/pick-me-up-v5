@@ -1,0 +1,59 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 18c6b12b92521044392c4270341c94df, type: 3}
+  m_Name: workshop
+  m_EditorClassIdentifier: 
+  FacilityId: workshop
+  DisplayName: Workshop
+  Description: The room where scrap becomes purpose.
+  FacilityType: 0
+  FacilityRole: CRAFTING
+  FacilityEmotion: The room where scrap becomes purpose.
+  MaxLevel: 10
+  StartingLevel: 1
+  GoldCostPerLevel:
+  - 250
+  - 375
+  - 500
+  - 625
+  - 750
+  - 875
+  - 1000
+  - 1125
+  - 1250
+  - 1375
+  GemCostPerLevel:
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  BenefitPerLevel:
+  - 10
+  - 15
+  - 20
+  - 25
+  - 30
+  - 35
+  - 40
+  - 45
+  - 50
+  - 55
+  UpgradeTimeBase: 60
+  UpgradeTimeMultiplier: 1.25
+  FacilityIcon: {fileID: 0}
+  FacilityColor: {r: 0.75, g: 0.55, b: 0.2, a: 1}

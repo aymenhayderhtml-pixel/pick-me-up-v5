@@ -1,0 +1,59 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 18c6b12b92521044392c4270341c94df, type: 3}
+  m_Name: square
+  m_EditorClassIdentifier: 
+  FacilityId: square
+  DisplayName: Square
+  Description: A gathering place where the Master's voice can steady the roster.
+  FacilityType: 1
+  FacilityRole: MORALE
+  FacilityEmotion: A gathering place where the Master's voice can steady the roster.
+  MaxLevel: 10
+  StartingLevel: 1
+  GoldCostPerLevel:
+  - 250
+  - 375
+  - 500
+  - 625
+  - 750
+  - 875
+  - 1000
+  - 1125
+  - 1250
+  - 1375
+  GemCostPerLevel:
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  BenefitPerLevel:
+  - 5
+  - 7.5
+  - 10
+  - 12.5
+  - 15
+  - 17.5
+  - 20
+  - 22.5
+  - 25
+  - 27.5
+  UpgradeTimeBase: 60
+  UpgradeTimeMultiplier: 1.25
+  FacilityIcon: {fileID: 0}
+  FacilityColor: {r: 0.55, g: 0.45, b: 0.25, a: 1}
