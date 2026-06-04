@@ -8,6 +8,7 @@ public class GameSaveData
     public int Gems;
     public int AttributeStones;
     public int MemorialFragments;
+    public int DungeonExp;
     public List<HeroInstance> Heroes;
     public PityData Pity;
 

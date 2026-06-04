@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e2c1699c0bd2b5841bc52a0f6a58cf27, type: 3}
+  m_Name: item_iron_ore
+  m_EditorClassIdentifier: 
+  ItemId: item_iron_ore
+  DisplayName: Iron Ore
+  Description: iron_ore
+  ItemType: 7
+  Rarity: 0
+  MaxStackSize: 99
+  BaseHealth: 0
+  BaseAttack: 0
+  BaseDefense: 0
+  BaseSpeed: 0
+  BaseCritRate: 0
+  BaseCritDamage: 0
+  HealAmount: 0
+  MoraleRestoreAmount: 0
+  EffectDuration: 0
+  Icon: {fileID: 0}
+  IconPath: 
+  RarityColor: {r: 1, g: 1, b: 1, a: 1}
+  IsCraftable: 0
+  CraftingRecipe:
+    RequiredItemIds: []
+    RequiredQuantities: 
+    GoldCost: 0
+    CraftTime: 0
+  SellValue: 8

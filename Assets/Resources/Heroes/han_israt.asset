@@ -15,9 +15,12 @@ MonoBehaviour:
   HeroId: han_israt
   HeroName: Han Israt
   BaseStarRank: 1
-  BaseClass: 1
-  BaseHP: 1000
-  BaseATK: 100
-  BaseDEF: 50
-  PortraitSpritePath: han_israt
+  BaseClass: 7
+  BaseHP: 12
+  BaseATK: 14
+  BaseDEF: 10
+  PortraitSpritePath: Portraits/han_israt
   CardFrameSpritePath: frame_1
+  HeroClass: 
+  Portrait: {fileID: 0}
+  LoreText: 

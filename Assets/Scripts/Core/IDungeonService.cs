@@ -3,56 +3,23 @@ using System.Collections.Generic;
 
 public interface IDungeonService
 {
-    int GetTacticalSignalLimit();
-    int GetQueuedTacticalSignalCount();
-    string GetTacticalSummary();
-    bool HasTacticalSignal(TacticalSignal signal);
-    bool ToggleTacticalSignal(TacticalSignal signal);
-    void ClearTacticalSignals();
-    List<DungeonDefinition> GetAllDungeons();
-    List<DungeonDefinition> GetAvailableDungeonsToday();
-    DungeonDefinition GetDungeon(string dungeonId);
-    int GetDungeonProgress(string dungeonId);
-    int GetStamina();
-    int GetMaxStamina();
-    bool CanRunDungeon(string dungeonId, int staminaCost);
-    DungeonRunResult RunDungeon(string dungeonId, List<string> heroInstanceIds);
-    FloorData GenerateFloor(string dungeonId, int floorNumber);
-    int CalculateTeamPower(List<string> heroInstanceIds);
-    void RechargeStamina(int amount);
-    void ProcessStaminaRegeneration();
-    void ResetProgress();
-}
+    event Action<DungeonDataSO> OnDungeonStarted;
+    event Action<EnemyWaveSO> OnWaveStarted;
+    event Action OnWaveCleared;
+    event Action OnDungeonCleared;
+    event Action OnDungeonFailed;
+    event Action<DungeonRewardResult> OnRewardGranted;
 
-[Serializable]
-public class DungeonRunResult
-{
-    public bool Success;
-    public string DungeonId;
-    public int FloorCleared;
-    public List<string> EarnedItemIds = new List<string>();
-    public int GoldEarned;
-    public int ExpEarned;
-    public int StonesEarned;
-    public List<string> AffectedHeroIds = new List<string>();
-    public List<HeroMoraleEffect> MoraleEffects = new List<HeroMoraleEffect>();
-    public List<string> TacticalSignals = new List<string>();
-    public string TacticalSummary;
-    public string FailureReason;
-}
+    DungeonRunState CurrentRunState { get; }
+    bool IsInDungeon { get; }
 
-[Serializable]
-public class HeroMoraleEffect
-{
-    public string HeroInstanceId;
-    public int MoraleChange;
-    public string Reason;
-}
+    List<DungeonDataSO> GetAllDungeons();
+    DungeonDataSO GetDungeon(string dungeonId);
+    bool CanAttemptDungeon(string dungeonId, int currentStamina, int currentLevel);
 
-[Serializable]
-public enum TacticalSignal
-{
-    Scan,
-    Focus,
-    Rally
+    void StartDungeon(DungeonDataSO dungeonData);
+    void RestoreRun(DungeonRunState savedState, DungeonDataSO dungeonData);
+    void RegisterEnemyKill();
+    void FailDungeon();
+    void AbandonDungeon();
 }

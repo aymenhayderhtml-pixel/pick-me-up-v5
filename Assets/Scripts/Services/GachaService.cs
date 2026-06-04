@@ -4,15 +4,15 @@ using UnityEngine;
 /// <summary>
 /// Handles weighted RNG pulls for Standard and Premium banners.
 /// 
-/// STANDARD BANNER (Gold)
+/// STANDARD BANNER (Gold)  — Moebius Standard Invocation
 ///   Cost: 1,000 Gold single / 9,000 Gold x10
-///   Rates: 1★ 60% | 2★ 25% | 3★ 12% | 4★ 2.5% | 5★ 0.5%
-///   Pity: 90 pulls → guaranteed 4★+; 180 pulls → guaranteed 5★
+///   Rates: 1* 68.9% | 2* 22% | 3* 8% | 4* 0.8% | 5* 0.1%
+///   Pity: 270 pulls → guaranteed 4*+; 300 pulls → guaranteed 5*
 ///
-/// PREMIUM BANNER (Gems)
+/// PREMIUM BANNER (Gems) — Moebius Advanced Invocation
 ///   Cost: 300 Gems single / 2,700 Gems x10
-///   Rates: 1★ 40% | 2★ 30% | 3★ 18% | 4★ 9%  | 5★ 3%
-///   Pity: 50 pulls → guaranteed 4★+; 100 pulls → guaranteed 5★
+///   Rates: 1* 50% | 2* 35% | 3* 13.2% | 4* 0.8% | 5* 0.1%  
+///   Pity: 150 pulls → guaranteed 4*+; 200 pulls → guaranteed 5*
 /// </summary>
 public class GachaService : IGachaService
 {
@@ -23,15 +23,18 @@ public class GachaService : IGachaService
     private const int PremiumTenCost      = 2700;
 
     // ── Pity thresholds ────────────────────────────────────────────────────
-    private const int StandardSoftPity   = 90;   // guaranteed 4★+
-    private const int StandardHardPity   = 180;  // guaranteed 5★
-    private const int PremiumSoftPity    = 50;   // guaranteed 4★+
-    private const int PremiumHardPity    = 100;  // guaranteed 5★
+    private const int StandardSoftPity   = 270;  // guaranteed 4*+
+    private const int StandardHardPity   = 300;  // guaranteed 5*
+    private const int PremiumSoftPity    = 150;  // guaranteed 4*+
+    private const int PremiumHardPity    = 200;  // guaranteed 5*
+
+    // ── Bond event (10x invocation) ────────────────────────────────────────
+    private const float BondEventChance  = 0.15f;
 
     // ── Dependencies ───────────────────────────────────────────────────────
     private readonly GameStateService  _gameState;
     private readonly ICurrencyService  _currency;
-    private readonly HeroRoster        _roster;   // all HeroDefinitions loaded from Resources
+    private readonly HeroRoster        _roster;
 
     public GachaService()
     {
@@ -106,12 +109,12 @@ public class GachaService : IGachaService
         }
         else if (pity >= StandardSoftPity)
         {
-            starRank = Random.value < 0.15f ? 5 : 4;
+            starRank = Random.value < 0.10f ? 5 : 4;
             if (starRank >= 4) _gameState.Data.Pity.StandardSummonCount = 0;
         }
         else
         {
-            starRank = WeightedRoll(new float[] { 0.60f, 0.25f, 0.12f, 0.025f, 0.005f });
+            starRank = WeightedRoll(new float[] { 0.689f, 0.22f, 0.08f, 0.008f, 0.001f });
         }
 
         return CreateHeroInstance(starRank);
@@ -129,21 +132,19 @@ public class GachaService : IGachaService
         }
         else if (pity >= PremiumSoftPity)
         {
-            starRank = Random.value < 0.30f ? 5 : 4;
+            starRank = Random.value < 0.10f ? 5 : 4;
             if (starRank >= 4) _gameState.Data.Pity.PremiumSummonCount = 0;
         }
         else
         {
-            starRank = WeightedRoll(new float[] { 0.40f, 0.30f, 0.18f, 0.09f, 0.03f });
+            starRank = WeightedRoll(new float[] { 0.50f, 0.35f, 0.132f, 0.008f, 0.001f });
         }
 
         return CreateHeroInstance(starRank);
     }
 
-    /// <summary>
-    /// Returns a 1-indexed star rank (1–5) based on cumulative probability weights.
-    /// weights[0] = P(1★), weights[1] = P(2★), etc.
-    /// </summary>
+    public bool RollBondEvent() => Random.value < BondEventChance;
+
     private int WeightedRoll(float[] weights)
     {
         float roll = Random.value;
@@ -153,19 +154,26 @@ public class GachaService : IGachaService
             cumulative += weights[i];
             if (roll < cumulative) return i + 1;
         }
-        return 1; // fallback
+        return 1;
     }
 
     /// <summary>
-    /// Picks a random HeroDefinition matching the target star rank and creates a HeroInstance.
-    /// Falls back to the nearest available rank if none exist for this rank.
+    /// Creates a HeroInstance for the given star rank.
+    /// Falls back through: matching rank → fallback placeholder → any hero.
     /// </summary>
     private HeroInstance CreateHeroInstance(int starRank)
     {
         HeroDefinition def = _roster.GetRandomByStarRank(starRank);
+
         if (def == null)
         {
-            Debug.LogWarning($"[GachaService] No HeroDefinition found for {starRank}★. Falling back.");
+            // Try fallback/placeholder for this rank
+            def = _roster.GetFallbackByStarRank(starRank);
+        }
+
+        if (def == null)
+        {
+            Debug.LogWarning($"[GachaService] No HeroDefinition found for {starRank}★. Falling back to any hero.");
             def = _roster.GetAny();
         }
 
@@ -183,19 +191,16 @@ public class GachaService : IGachaService
         if (hero == null) return;
         _gameState.Data.Heroes.Add(hero);
         if (_gameState.Data.DiscoveredHeroIds == null)
-        {
             _gameState.Data.DiscoveredHeroIds = new List<string>();
-        }
 
         if (!string.IsNullOrEmpty(hero.HeroDefId) && !_gameState.Data.DiscoveredHeroIds.Contains(hero.HeroDefId))
-        {
             _gameState.Data.DiscoveredHeroIds.Add(hero.HeroDefId);
-        }
     }
 }
 
 /// <summary>
 /// Lightweight helper that loads all HeroDefinitions from Resources/Heroes/.
+/// Includes fallback support for missing star ranks.
 /// </summary>
 public class HeroRoster
 {
@@ -215,6 +220,21 @@ public class HeroRoster
         List<HeroDefinition> pool = _all.FindAll(h => h.BaseStarRank == starRank);
         if (pool.Count == 0) return null;
         return pool[Random.Range(0, pool.Count)];
+    }
+
+    /// <summary>
+    /// Returns a fallback/placeholder HeroDefinition for the given star rank.
+    /// Looks for the specific fallback asset pattern "hero_{rank}star_default" or any hero of that rank.
+    /// </summary>
+    public HeroDefinition GetFallbackByStarRank(int starRank)
+    {
+        string fallbackId = $"hero_{starRank}star_default";
+        foreach (HeroDefinition h in _all)
+        {
+            if (h.HeroId == fallbackId)
+                return h;
+        }
+        return null;
     }
 
     public HeroDefinition GetAny()

@@ -11,6 +11,7 @@ public class CurrencyService : ICurrencyService
     public int GetGems() => _gameState.Data.Gems;
     public int GetAttributeStones() => _gameState.Data.AttributeStones;
     public int GetMemorialFragments() => _gameState.Data.MemorialFragments;
+    public int GetDungeonExp() => _gameState.Data.DungeonExp;
 
     public bool SpendGold(int amount)
     {
@@ -44,6 +45,14 @@ public class CurrencyService : ICurrencyService
         return true;
     }
 
+    public bool SpendDungeonExp(int amount)
+    {
+        if (_gameState.Data.DungeonExp < amount) return false;
+        _gameState.Data.DungeonExp -= amount;
+        _gameState.Save();
+        return true;
+    }
+
     public void AddGold(int amount)
     {
         _gameState.Data.Gold += amount;
@@ -65,6 +74,13 @@ public class CurrencyService : ICurrencyService
     public void AddMemorialFragments(int amount)
     {
         _gameState.Data.MemorialFragments += amount;
+        _gameState.Save();
+    }
+
+    public void AddDungeonExp(int amount)
+    {
+        if (amount <= 0) return;
+        _gameState.Data.DungeonExp += amount;
         _gameState.Save();
     }
 }

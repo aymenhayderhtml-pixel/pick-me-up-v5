@@ -19,5 +19,8 @@ MonoBehaviour:
   BaseHP: 4000
   BaseATK: 400
   BaseDEF: 200
-  PortraitSpritePath: belquist
+  PortraitSpritePath: Portraits/belquist
   CardFrameSpritePath: frame_4
+  HeroClass: 
+  Portrait: {fileID: 0}
+  LoreText: 

@@ -16,7 +16,6 @@ public class ProjectSetupTool
         CreateScene("Assets/Scenes/Summon.unity", SetupSummonUI.CreateSummonUI);
         CreateScene("Assets/Scenes/Roster.unity", SetupRosterUI.Execute);
         CreateScene("Assets/Scenes/Tower.unity", SetupTowerUI.Execute);
-        CreateScene("Assets/Scenes/Dungeon.unity", SetupDungeonUI.Execute);
         CreateScene("Assets/Scenes/Inventory.unity", SetupInventoryUI.Execute);
         CreateScene("Assets/Scenes/MemorialHall.unity", SetupMemorialHallUI.Execute);
         CreateScene("Assets/Scenes/Facilities.unity", SetupFacilityUI.Execute);
@@ -29,7 +28,6 @@ public class ProjectSetupTool
             new EditorBuildSettingsScene("Assets/Scenes/Summon.unity", true),
             new EditorBuildSettingsScene("Assets/Scenes/Roster.unity", true),
             new EditorBuildSettingsScene("Assets/Scenes/Tower.unity", true),
-            new EditorBuildSettingsScene("Assets/Scenes/Dungeon.unity", true),
             new EditorBuildSettingsScene("Assets/Scenes/Inventory.unity", true),
             new EditorBuildSettingsScene("Assets/Scenes/MemorialHall.unity", true),
             new EditorBuildSettingsScene("Assets/Scenes/Facilities.unity", true),

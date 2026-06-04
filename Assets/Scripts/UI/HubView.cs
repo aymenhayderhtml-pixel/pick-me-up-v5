@@ -19,12 +19,10 @@ public class HubView : MonoBehaviour
     [SerializeField] private Button memorialBtn;
 
     private ICurrencyService _currencyService;
-    private IDungeonService _dungeonService;
 
     private void Start()
     {
         _currencyService = ServiceRegistry.Instance.Resolve<ICurrencyService>();
-        _dungeonService = ServiceRegistry.Instance.Resolve<IDungeonService>();
 
         WireButton(rosterBtn, "Roster");
         WireButton(synthBtn, "SynthesisLab");
@@ -41,10 +39,6 @@ public class HubView : MonoBehaviour
     private void OnEnable()
     {
         RefreshUI();
-        if (_dungeonService != null)
-        {
-            _dungeonService.ProcessStaminaRegeneration();
-        }
     }
 
     private void Update()
@@ -77,10 +71,7 @@ public class HubView : MonoBehaviour
             stonesLabel.text = "Stones: " + _currencyService.GetAttributeStones().ToString("N0");
         }
 
-        if (staminaLabel != null && _dungeonService != null)
-        {
-            staminaLabel.text = "Stamina: " + _dungeonService.GetStamina() + "/" + _dungeonService.GetMaxStamina();
-        }
+        if (staminaLabel != null) staminaLabel.text = "Stamina: --";
     }
 
     private void WireButton(Button button, string sceneName)

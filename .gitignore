@@ -42,3 +42,22 @@ Assets/AddressableAssetsData/*/*.tmp
 
 # Logs from package managers / tooling
 *.log
+
+# AI assistant config
+.commandcode/
+
+# Old backup / temp content
+mini max code/
+light novel/
+
+# Project utility files
+start-project.bat
+patch_summonview.py
+diff_summon.txt
+diff_summon_utf8.patch
+dungeon_scene_backup.txt
+handoff.md
+diff_summon_utf8.patch
+
+# Unity temp files
+.utmp/

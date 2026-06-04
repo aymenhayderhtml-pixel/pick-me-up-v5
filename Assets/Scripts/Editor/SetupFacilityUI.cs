@@ -167,7 +167,7 @@ public static class SetupFacilityUI
         canvas.renderMode = RenderMode.ScreenSpaceOverlay;
         CanvasScaler scaler = go.GetComponent<CanvasScaler>();
         scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-        scaler.referenceResolution = new Vector2(1080, 2340);
+        scaler.referenceResolution = new Vector2(2400, 1080);
         scaler.matchWidthOrHeight = 0.5f;
         return canvas;
     }

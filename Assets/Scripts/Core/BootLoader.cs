@@ -5,6 +5,13 @@ public class BootLoader : MonoBehaviour
 {
     private void Start()
     {
+        // 0. Lock orientation to landscape and disable auto-rotation
+        Screen.orientation = ScreenOrientation.LandscapeLeft;
+        Screen.autorotateToPortrait = false;
+        Screen.autorotateToPortraitUpsideDown = false;
+        Screen.autorotateToLandscapeLeft = false;
+        Screen.autorotateToLandscapeRight = false;
+
         // 1. Ensure ServiceRegistry is available (fallback if not placed in scene manually)
         if (ServiceRegistry.Instance == null)
         {
@@ -49,7 +56,11 @@ public class BootLoader : MonoBehaviour
         IFacilityService facilityService = new FacilityService();
         ServiceRegistry.Instance.Register<IFacilityService>(facilityService);
 
-        // 11. Register DungeonService
+        // 11. Register DungeonRewardService (must be registered BEFORE DungeonService so DungeonService picks it up in its constructor)
+        IDungeonRewardService dungeonRewardService = new DungeonRewardService();
+        ServiceRegistry.Instance.Register<IDungeonRewardService>(dungeonRewardService);
+
+        // 11b. Register DungeonService
         IDungeonService dungeonService = new DungeonService();
         ServiceRegistry.Instance.Register<IDungeonService>(dungeonService);
 

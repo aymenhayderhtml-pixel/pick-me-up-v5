@@ -13,25 +13,71 @@ public static class SetupHubUI
 
         Canvas canvas = CreateCanvas("HubCanvas");
 
-        GameObject topBar = FindOrCreateChild(canvas.transform, "TopBar", () => CreatePanel("TopBar", canvas.transform, new Color(0.08f, 0.08f, 0.12f, 0.95f)));
+        GameObject topBar = FindOrCreateChild(canvas.transform, "TopBar", () => CreatePanel("TopBar", canvas.transform, new Color(0.05f, 0.06f, 0.10f, 0.98f)));
         SetAnchors(topBar, new Vector2(0, 0.88f), new Vector2(1, 1));
 
-        GameObject goldLabel = FindOrCreateChild(topBar.transform, "GoldLabel", () => CreateTMP("GoldLabel", "Gold: 0", 28, topBar.transform));
-        SetAnchors(goldLabel, new Vector2(0.02f, 0.15f), new Vector2(0.24f, 0.85f));
+        // Player Identity Panel (avatar, name, level, XP bar)
+        GameObject playerCard = FindOrCreateChild(topBar.transform, "PlayerIdentity", () => CreatePanel("PlayerIdentity", topBar.transform, Color.clear));
+        SetAnchors(playerCard, new Vector2(0.02f, 0.05f), new Vector2(0.48f, 0.95f));
 
-        GameObject gemsLabel = FindOrCreateChild(topBar.transform, "GemsLabel", () => CreateTMP("GemsLabel", "Gems: 0", 28, topBar.transform));
-        SetAnchors(gemsLabel, new Vector2(0.24f, 0.15f), new Vector2(0.46f, 0.85f));
+        GameObject avatar = FindOrCreateChild(playerCard.transform, "Avatar", () => CreatePanel("Avatar", playerCard.transform, new Color(0.12f, 0.18f, 0.35f, 1f)));
+        SetAnchors(avatar, new Vector2(0f, 0.10f), new Vector2(0.18f, 0.90f));
 
-        GameObject stonesLabel = FindOrCreateChild(topBar.transform, "StonesLabel", () => CreateTMP("StonesLabel", "Stones: 0", 28, topBar.transform));
-        SetAnchors(stonesLabel, new Vector2(0.46f, 0.15f), new Vector2(0.68f, 0.85f));
+        GameObject nameLabel = FindOrCreateChild(playerCard.transform, "PlayerName", () => CreateTMP("PlayerName", "Loki (Master)", 26, playerCard.transform));
+        SetAnchors(nameLabel, new Vector2(0.20f, 0.50f), new Vector2(0.60f, 0.90f));
+        nameLabel.GetComponent<TextMeshProUGUI>().alignment = TextAlignmentOptions.Left;
+        nameLabel.GetComponent<TextMeshProUGUI>().fontStyle = FontStyles.Bold;
 
-        GameObject staminaLabel = FindOrCreateChild(topBar.transform, "StaminaLabel", () => CreateTMP("StaminaLabel", "Stamina: 100/100", 28, topBar.transform));
-        SetAnchors(staminaLabel, new Vector2(0.68f, 0.15f), new Vector2(0.98f, 0.85f));
+        GameObject lvLabel = FindOrCreateChild(playerCard.transform, "PlayerLevel", () => CreateTMP("PlayerLevel", "Lv.14", 22, playerCard.transform));
+        SetAnchors(lvLabel, new Vector2(0.62f, 0.50f), new Vector2(0.98f, 0.90f));
+        lvLabel.GetComponent<TextMeshProUGUI>().alignment = TextAlignmentOptions.Right;
+        lvLabel.GetComponent<TextMeshProUGUI>().color = new Color(1f, 0.76f, 0.03f, 1f); // Gold
 
-        GameObject centerArea = FindOrCreateChild(canvas.transform, "CenterArea", () => CreatePanel("CenterArea", canvas.transform, new Color(0.04f, 0.05f, 0.08f, 1f)));
+        GameObject xpBg = FindOrCreateChild(playerCard.transform, "XPBarBg", () => CreatePanel("XPBarBg", playerCard.transform, new Color(0.05f, 0.05f, 0.08f, 1f)));
+        SetAnchors(xpBg, new Vector2(0.20f, 0.15f), new Vector2(0.98f, 0.35f));
+
+        GameObject xpFill = FindOrCreateChild(xpBg.transform, "XPBarFill", () => CreatePanel("XPBarFill", xpBg.transform, new Color(0f, 0.7f, 1f, 1f)));
+        SetAnchors(xpFill, new Vector2(0f, 0f), new Vector2(0.65f, 1f)); // 65% XP
+
+        // Currency Displays (Shifted to the right side of TopBar, color coded)
+        GameObject goldLabel = FindOrCreateChild(topBar.transform, "GoldLabel", () => CreateTMP("GoldLabel", "Gold: 0", 24, topBar.transform));
+        SetAnchors(goldLabel, new Vector2(0.50f, 0.15f), new Vector2(0.62f, 0.85f));
+        goldLabel.GetComponent<TextMeshProUGUI>().color = new Color(1f, 0.84f, 0f, 1f); // Gold yellow
+        goldLabel.GetComponent<TextMeshProUGUI>().fontStyle = FontStyles.Bold;
+
+        GameObject gemsLabel = FindOrCreateChild(topBar.transform, "GemsLabel", () => CreateTMP("GemsLabel", "Gems: 0", 24, topBar.transform));
+        SetAnchors(gemsLabel, new Vector2(0.62f, 0.15f), new Vector2(0.74f, 0.85f));
+        gemsLabel.GetComponent<TextMeshProUGUI>().color = new Color(0f, 0.90f, 1f, 1f); // Gems cyan
+        gemsLabel.GetComponent<TextMeshProUGUI>().fontStyle = FontStyles.Bold;
+
+        GameObject stonesLabel = FindOrCreateChild(topBar.transform, "StonesLabel", () => CreateTMP("StonesLabel", "Stones: 0", 24, topBar.transform));
+        SetAnchors(stonesLabel, new Vector2(0.74f, 0.15f), new Vector2(0.86f, 0.85f));
+        stonesLabel.GetComponent<TextMeshProUGUI>().color = new Color(0.82f, 0.77f, 0.91f); // Stones lavender
+        stonesLabel.GetComponent<TextMeshProUGUI>().fontStyle = FontStyles.Bold;
+
+        GameObject staminaLabel = FindOrCreateChild(topBar.transform, "StaminaLabel", () => CreateTMP("StaminaLabel", "Stamina: 100/100", 24, topBar.transform));
+        SetAnchors(staminaLabel, new Vector2(0.86f, 0.15f), new Vector2(0.98f, 0.85f));
+        staminaLabel.GetComponent<TextMeshProUGUI>().color = new Color(0f, 0.90f, 0.46f, 1f); // Stamina green
+        staminaLabel.GetComponent<TextMeshProUGUI>().fontStyle = FontStyles.Bold;
+
+        // Background / void fill: CenterArea and events
+        GameObject centerArea = FindOrCreateChild(canvas.transform, "CenterArea", () => CreatePanel("CenterArea", canvas.transform, new Color(0.08f, 0.10f, 0.15f, 1f)));
         SetAnchors(centerArea, new Vector2(0, 0.20f), new Vector2(1, 0.88f));
 
-        GameObject bottomDock = FindOrCreateChild(canvas.transform, "BottomDock", () => CreatePanel("BottomDock", canvas.transform, new Color(0.06f, 0.06f, 0.1f, 0.98f)));
+        GameObject carousel = FindOrCreateChild(centerArea.transform, "EventCarousel", () => CreatePanel("EventCarousel", centerArea.transform, new Color(0.05f, 0.06f, 0.10f, 0.6f)));
+        SetAnchors(carousel, new Vector2(0.05f, 0.10f), new Vector2(0.95f, 0.90f));
+
+        GameObject bannerTitle = FindOrCreateChild(carousel.transform, "BannerTitle", () => CreateTMP("BannerTitle", "EVENT: CODES OF TAONI", 36, carousel.transform));
+        SetAnchors(bannerTitle, new Vector2(0.05f, 0.75f), new Vector2(0.95f, 0.90f));
+        bannerTitle.GetComponent<TextMeshProUGUI>().color = new Color(1f, 0.76f, 0.03f, 1f); // Gold accent
+        bannerTitle.GetComponent<TextMeshProUGUI>().fontStyle = FontStyles.Bold;
+
+        GameObject bannerDesc = FindOrCreateChild(carousel.transform, "BannerDesc", () => CreateTMP("BannerDesc", "Flesh out facility upgrades, explore Towers,\nand prepare your Heroes for the spatial crack.\n\nRate up event is currently live in the summoning room!", 26, carousel.transform));
+        SetAnchors(bannerDesc, new Vector2(0.05f, 0.20f), new Vector2(0.95f, 0.70f));
+        bannerDesc.GetComponent<TextMeshProUGUI>().color = new Color(0.70f, 0.61f, 0.86f); // secondary lavender
+        bannerDesc.GetComponent<TextMeshProUGUI>().alignment = TextAlignmentOptions.Center;
+
+        GameObject bottomDock = FindOrCreateChild(canvas.transform, "BottomDock", () => CreatePanel("BottomDock", canvas.transform, new Color(0.05f, 0.06f, 0.10f, 0.98f)));
         SetAnchors(bottomDock, new Vector2(0, 0), new Vector2(1, 0.20f));
 
         GameObject topRow = FindOrCreateChild(bottomDock.transform, "TopRow", () => CreatePanel("TopRow", bottomDock.transform, Color.clear));
@@ -42,15 +88,27 @@ public static class SetupHubUI
         SetAnchors(bottomRow, new Vector2(0.02f, 0.04f), new Vector2(0.98f, 0.50f));
         ConfigureRow(bottomRow);
 
-        GameObject rosterBtn = FindOrCreateChild(topRow.transform, "RosterBtn", () => CreateButton("RosterBtn", "ROSTER", topRow.transform, new Color(0.18f, 0.2f, 0.28f, 1f), 24));
-        GameObject synthBtn = FindOrCreateChild(topRow.transform, "SynthBtn", () => CreateButton("SynthBtn", "SYNTH", topRow.transform, new Color(0.18f, 0.2f, 0.28f, 1f), 24));
-        GameObject trainBtn = FindOrCreateChild(topRow.transform, "TrainBtn", () => CreateButton("TrainBtn", "FACILITIES", topRow.transform, new Color(0.18f, 0.2f, 0.28f, 1f), 22));
-        GameObject towerBtn = FindOrCreateChild(topRow.transform, "TowerBtn", () => CreateButton("TowerBtn", "TOWER", topRow.transform, new Color(0.18f, 0.2f, 0.28f, 1f), 24));
+        // Grid Button styling and priority differences
+        Color normalBtnColor = new Color(0.12f, 0.18f, 0.35f, 1f); // deep navy
+        Color priorityBtnColor = new Color(0.35f, 0.20f, 0.65f, 1f); // Royal purple for SUMMON
+        Color priorityDungeonColor = new Color(0.20f, 0.35f, 0.65f, 1f); // Royal blue for DUNGEON
 
-        GameObject summonBtn = FindOrCreateChild(bottomRow.transform, "SummonBtn", () => CreateButton("SummonBtn", "SUMMON", bottomRow.transform, new Color(0.18f, 0.2f, 0.28f, 1f), 24));
-        GameObject dungeonBtn = FindOrCreateChild(bottomRow.transform, "DungeonBtn", () => CreateButton("DungeonBtn", "DUNGEON", bottomRow.transform, new Color(0.18f, 0.2f, 0.28f, 1f), 24));
-        GameObject inventoryBtn = FindOrCreateChild(bottomRow.transform, "InventoryBtn", () => CreateButton("InventoryBtn", "INVENTORY", bottomRow.transform, new Color(0.18f, 0.2f, 0.28f, 1f), 22));
-        GameObject memorialBtn = FindOrCreateChild(bottomRow.transform, "MemorialBtn", () => CreateButton("MemorialBtn", "MEMORIAL", bottomRow.transform, new Color(0.18f, 0.2f, 0.28f, 1f), 22));
+        GameObject rosterBtn = FindOrCreateChild(topRow.transform, "RosterBtn", () => CreateButton("RosterBtn", "ROSTER", topRow.transform, normalBtnColor, 24));
+        GameObject synthBtn = FindOrCreateChild(topRow.transform, "SynthBtn", () => CreateButton("SynthBtn", "SYNTH", topRow.transform, normalBtnColor, 24));
+        GameObject trainBtn = FindOrCreateChild(topRow.transform, "TrainBtn", () => CreateButton("TrainBtn", "FACILITIES", topRow.transform, normalBtnColor, 22));
+        GameObject towerBtn = FindOrCreateChild(topRow.transform, "TowerBtn", () => CreateButton("TowerBtn", "TOWER", topRow.transform, normalBtnColor, 24));
+
+        GameObject summonBtn = FindOrCreateChild(bottomRow.transform, "SummonBtn", () => CreateButton("SummonBtn", "SUMMON", bottomRow.transform, priorityBtnColor, 24));
+        GameObject dungeonBtn = FindOrCreateChild(bottomRow.transform, "DungeonBtn", () => CreateButton("DungeonBtn", "DUNGEON", bottomRow.transform, priorityDungeonColor, 24));
+        GameObject inventoryBtn = FindOrCreateChild(bottomRow.transform, "InventoryBtn", () => CreateButton("InventoryBtn", "INVENTORY", bottomRow.transform, normalBtnColor, 22));
+        GameObject memorialBtn = FindOrCreateChild(bottomRow.transform, "MemorialBtn", () => CreateButton("MemorialBtn", "MEMORIAL", bottomRow.transform, normalBtnColor, 22));
+
+        // Notification Badges (SUMMON & MEMORIAL)
+        GameObject summonBadge = FindOrCreateChild(summonBtn.transform, "NotificationBadge", () => CreatePanel("NotificationBadge", summonBtn.transform, new Color(0.85f, 0.15f, 0.15f, 1f)));
+        SetAnchors(summonBadge, new Vector2(0.85f, 0.70f), new Vector2(0.97f, 0.95f));
+
+        GameObject memorialBadge = FindOrCreateChild(memorialBtn.transform, "NotificationBadge", () => CreatePanel("NotificationBadge", memorialBtn.transform, new Color(0.85f, 0.15f, 0.15f, 1f)));
+        SetAnchors(memorialBadge, new Vector2(0.85f, 0.70f), new Vector2(0.97f, 0.95f));
 
         HubView hubView = canvas.gameObject.GetComponent<HubView>();
         if (hubView == null)
@@ -84,7 +142,7 @@ public static class SetupHubUI
         canvas.renderMode = RenderMode.ScreenSpaceOverlay;
         CanvasScaler scaler = go.GetComponent<CanvasScaler>();
         scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-        scaler.referenceResolution = new Vector2(1080, 2340);
+        scaler.referenceResolution = new Vector2(2400, 1080);
         scaler.matchWidthOrHeight = 0.5f;
         return canvas;
     }

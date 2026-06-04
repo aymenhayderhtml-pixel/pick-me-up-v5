@@ -63,6 +63,12 @@ public class SaveLoadService : ISaveLoadService
         return newSave;
     }
 
+    private static readonly Dictionary<string, string> HeroDefIdMigration = new Dictionary<string, string>
+    {
+        { "jenna_shirai", "jenna_cirai" },
+        { "aaron_delkard", "aaron_delcut" },
+    };
+
     private GameSaveData Normalize(GameSaveData data)
     {
         if (data == null)
@@ -118,6 +124,40 @@ public class SaveLoadService : ISaveLoadService
         if (data.MemorialFragments < 0)
         {
             data.MemorialFragments = 0;
+        }
+
+        // Phase 1 migration: canonicalize hero def IDs
+        bool migrated = false;
+        for (int i = 0; i < data.Heroes.Count; i++)
+        {
+            if (data.Heroes[i] != null && HeroDefIdMigration.TryGetValue(data.Heroes[i].HeroDefId, out string newId))
+            {
+                data.Heroes[i].HeroDefId = newId;
+                migrated = true;
+            }
+        }
+
+        for (int i = 0; i < data.DiscoveredHeroIds.Count; i++)
+        {
+            if (HeroDefIdMigration.TryGetValue(data.DiscoveredHeroIds[i], out string newId))
+            {
+                data.DiscoveredHeroIds[i] = newId;
+                migrated = true;
+            }
+        }
+
+        for (int i = 0; i < data.MemorialEchoHeroIds.Count; i++)
+        {
+            if (HeroDefIdMigration.TryGetValue(data.MemorialEchoHeroIds[i], out string newId))
+            {
+                data.MemorialEchoHeroIds[i] = newId;
+                migrated = true;
+            }
+        }
+
+        if (migrated)
+        {
+            Debug.Log("[SaveLoadService] Migrated old hero ID references in save data (Phase 1).");
         }
 
         return data;

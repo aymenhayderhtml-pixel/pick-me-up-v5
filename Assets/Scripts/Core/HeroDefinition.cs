@@ -8,7 +8,8 @@ public enum HeroClass
     Berserker,
     Assassin,
     Support,
-    Specialist
+    Specialist,
+    Novice
 }
 
 [CreateAssetMenu(fileName = "NewHeroDefinition", menuName = "PickMeUp/Hero Definition")]

@@ -19,5 +19,8 @@ MonoBehaviour:
   BaseHP: 4000
   BaseATK: 400
   BaseDEF: 200
-  PortraitSpritePath: edith
+  PortraitSpritePath: Portraits/edith
   CardFrameSpritePath: frame_4
+  HeroClass: 
+  Portrait: {fileID: 0}
+  LoreText: 

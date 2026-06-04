@@ -21,9 +21,6 @@ EditorBuildSettings:
     path: Assets/Scenes/Tower.unity
     guid: 3f817483aca15b54396457275cf1cc83
   - enabled: 1
-    path: Assets/Scenes/Dungeon.unity
-    guid: f3b7c36b963a8b94e9a6346e966f0ab4
-  - enabled: 1
     path: Assets/Scenes/Inventory.unity
     guid: fb17dbaef32c72f48b8c97b2fdfad6f1
   - enabled: 1
@@ -35,6 +32,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/SynthesisLab.unity
     guid: 46a64277adc2cee49a31427ba257a08d
+  - enabled: 1
+    path: Assets/Scenes/Dungeon.unity
+    guid: f3b7c36b963a8b94e9a6346e966f0ab4
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
   m_UseUCBPForAssetBundles: 0

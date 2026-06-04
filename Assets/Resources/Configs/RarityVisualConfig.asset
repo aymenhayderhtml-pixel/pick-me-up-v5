@@ -1,0 +1,60 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0c9fcafba83c2f1408ef672fbe4d733e, type: 3}
+  m_Name: RarityVisualConfig
+  m_EditorClassIdentifier: 
+  rarityTiers:
+  - rarity: 1
+    textColor: {r: 0.62, g: 0.62, b: 0.62, a: 1}
+    circleGlowColor: {r: 0.35, g: 0.35, b: 0.38, a: 1}
+    environmentGlowColor: {r: 0.25, g: 0.25, b: 0.28, a: 1}
+    environmentGlowIntensity: 0.15
+    circleGlowIntensity: 0.4
+    useParticles: 0
+    enablePulsingGlow: 0
+    pulsingScale: 1.05
+  - rarity: 2
+    textColor: {r: 0.3, g: 0.69, b: 0.31, a: 1}
+    circleGlowColor: {r: 0.2, g: 0.5, b: 0.22, a: 1}
+    environmentGlowColor: {r: 0.15, g: 0.35, b: 0.17, a: 1}
+    environmentGlowIntensity: 0.2
+    circleGlowIntensity: 0.45
+    useParticles: 0
+    enablePulsingGlow: 0
+    pulsingScale: 1.05
+  - rarity: 3
+    textColor: {r: 0.18, g: 0.59, b: 0.95, a: 1}
+    circleGlowColor: {r: 0.18, g: 0.38, b: 0.72, a: 1}
+    environmentGlowColor: {r: 0.12, g: 0.28, b: 0.52, a: 1}
+    environmentGlowIntensity: 0.3
+    circleGlowIntensity: 0.55
+    useParticles: 0
+    enablePulsingGlow: 0
+    pulsingScale: 1.05
+  - rarity: 4
+    textColor: {r: 0.61, g: 0.15, b: 0.69, a: 1}
+    circleGlowColor: {r: 0.48, g: 0.18, b: 0.72, a: 1}
+    environmentGlowColor: {r: 0.35, g: 0.12, b: 0.55, a: 1}
+    environmentGlowIntensity: 0.5
+    circleGlowIntensity: 0.75
+    useParticles: 1
+    enablePulsingGlow: 1
+    pulsingScale: 1.05
+  - rarity: 5
+    textColor: {r: 1, g: 0.76, b: 0.03, a: 1}
+    circleGlowColor: {r: 0.75, g: 0.6, b: 0.05, a: 1}
+    environmentGlowColor: {r: 0.55, g: 0.4, b: 0.03, a: 1}
+    environmentGlowIntensity: 0.7
+    circleGlowIntensity: 0.85
+    useParticles: 1
+    enablePulsingGlow: 1
+    pulsingScale: 1.08

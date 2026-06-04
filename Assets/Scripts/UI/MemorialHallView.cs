@@ -41,11 +41,24 @@ public class MemorialHallView : MonoBehaviour
         Undiscovered
     }
 
+    private T ResolveChild<T>(string path) where T : Component
+    {
+        Transform t = transform.Find(path);
+        return t != null ? t.GetComponent<T>() : null;
+    }
+
     private void Start()
     {
         _gameState = ServiceRegistry.Instance.Resolve<GameStateService>();
         _roster = ServiceRegistry.Instance.Resolve<IRosterService>();
         _allDefinitions = new List<HeroDefinition>(Resources.LoadAll<HeroDefinition>("Heroes"));
+
+        // Self-heal: find children by name if serialized references are null
+        if (backButton == null) backButton = ResolveChild<Button>("TopBar/BackButton") ?? ResolveChild<Button>("BackButton");
+        if (allButton == null) allButton = ResolveChild<Button>("FilterBar/AllButton") ?? ResolveChild<Button>("FilterBar/All");
+        if (discoveredButton == null) discoveredButton = ResolveChild<Button>("FilterBar/DiscoveredButton") ?? ResolveChild<Button>("FilterBar/Discovered");
+        if (undiscoveredButton == null) undiscoveredButton = ResolveChild<Button>("FilterBar/UndiscoveredButton") ?? ResolveChild<Button>("FilterBar/Hidden");
+        if (detailCloseButton == null) detailCloseButton = ResolveChild<Button>("DetailPanel/DetailCloseButton") ?? ResolveChild<Button>("DetailCloseButton");
 
         if (backButton != null)
         {
@@ -169,7 +182,11 @@ public class MemorialHallView : MonoBehaviour
 
         CreateTMP("Name", discovered ? HeroPresentationUtility.GetDisplayName(def, def.HeroId).ToUpperInvariant() : "???", 16, card.transform, new Vector2(0.05f, 0.05f), new Vector2(0.95f, 0.22f));
         CreateTMP("Class", discovered ? HeroPresentationUtility.GetHeroSubtitle(def) : "LOCKED", 11, card.transform, new Vector2(0.05f, 0.22f), new Vector2(0.95f, 0.37f));
-        CreateTMP("Stars", new string('★', Mathf.Clamp(def.BaseStarRank, 1, 5)), 14, card.transform, new Vector2(0.05f, 0.82f), new Vector2(0.95f, 0.97f));
+        // Build ASCII star string
+        int starCount = Mathf.Clamp(def.BaseStarRank, 1, 5);
+        System.Text.StringBuilder starSb = new System.Text.StringBuilder();
+        for (int si = 0; si < starCount; si++) starSb.Append("[*]");
+        CreateTMP("Stars", starSb.ToString(), 14, card.transform, new Vector2(0.05f, 0.82f), new Vector2(0.95f, 0.97f));
         if (echoed)
         {
             CreateTMP("Echo", "ECHO", 12, card.transform, new Vector2(0.05f, 0.65f), new Vector2(0.95f, 0.8f));
@@ -204,7 +221,7 @@ public class MemorialHallView : MonoBehaviour
             else
             {
                 detailPortrait.sprite = null;
-                detailPortrait.color = GetClassColor(def.BaseClass);
+                detailPortrait.color = HeroColorUtility.GetClassColor(def.BaseClass);
             }
         }
 
@@ -220,7 +237,10 @@ public class MemorialHallView : MonoBehaviour
 
         if (detailStarsText != null)
         {
-            detailStarsText.text = new string('★', Mathf.Clamp(def.BaseStarRank, 1, 5));
+            int sc = Mathf.Clamp(def.BaseStarRank, 1, 5);
+            System.Text.StringBuilder dsSb = new System.Text.StringBuilder();
+            for (int si = 0; si < sc; si++) dsSb.Append("[*]");
+            detailStarsText.text = dsSb.ToString();
         }
 
         if (detailLoreText != null)
@@ -270,23 +290,6 @@ public class MemorialHallView : MonoBehaviour
 
         string acquired = new System.DateTime(hero.AcquiredTimestampTicks, System.DateTimeKind.Utc).ToString("yyyy-MM-dd");
         return $"Acquired {acquired}";
-    }
-
-    private Color GetClassColor(HeroClass heroClass)
-    {
-        switch (heroClass)
-        {
-            case HeroClass.Vanguard:
-                return new Color(0.9f, 0.3f, 0.3f);
-            case HeroClass.Mage:
-                return new Color(0.3f, 0.3f, 0.9f);
-            case HeroClass.Support:
-                return new Color(0.3f, 0.9f, 0.5f);
-            case HeroClass.Berserker:
-                return new Color(0.8f, 0.6f, 0.2f);
-            default:
-                return Color.gray;
-        }
     }
 
     private void UpdateCompletion()
