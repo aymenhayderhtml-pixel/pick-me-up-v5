@@ -3,955 +3,1141 @@ using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  FacilityView  –  dark-fantasy HQ management screen
-//  Procedurally built; no Inspector wiring required.
+//  FacilityView  –  dark military sci-fi HQ  |  Landscape 2340 × 1080
 // ─────────────────────────────────────────────────────────────────────────────
 public class FacilityView : MonoBehaviour
 {
-    // ── colours ──────────────────────────────────────────────────────────────
-    private static readonly Color ColBg          = Hex("#0B0D1A");
-    private static readonly Color ColPanel       = Hex("#111525");
-    private static readonly Color ColCard        = Hex("#151929");
-    private static readonly Color ColCardBorder  = Hex("#1E2440");
-    private static readonly Color ColGold        = Hex("#C8A84B");
-    private static readonly Color ColGoldDim     = Hex("#7A6530");
-    private static readonly Color ColGem         = Hex("#5B9EE0");
-    private static readonly Color ColMorale      = Hex("#3AB87A");
-    private static readonly Color ColMoraleLow   = Hex("#E05050");
-    private static readonly Color ColText        = Hex("#D8DCF0");
-    private static readonly Color ColSubText     = Hex("#8890B0");
-    private static readonly Color ColUpgrade     = Hex("#2A6A3A");
-    private static readonly Color ColUpgradeHi   = Hex("#3A8A4A");
-    private static readonly Color ColLocked      = Hex("#1A1D2E");
-    private static readonly Color ColLockedText  = Hex("#3A3E55");
-    private static readonly Color ColSelectedGlow= Hex("#C8A84B");
-    private static readonly Color ColDivider     = Hex("#1E2440");
-    private static readonly Color ColHeaderBg    = Hex("#0D1020");
-    private static readonly Color ColDetailBg    = Hex("#0F1322");
+    // ── Palette ───────────────────────────────────────────────────────────────
+    static readonly Color C_BgDeep      = Hex("#050a08");
+    static readonly Color C_Card        = Hex("#0D1120");
+    static readonly Color C_CardBdr     = Hex("#1B223D");
+    static readonly Color C_Gold        = Hex("#C8A84B");
+    static readonly Color C_GoldDim     = Hex("#5A4A25");
+    static readonly Color C_Gem         = Hex("#4A8ECF");
+    static readonly Color C_Green       = Hex("#2EA869");
+    static readonly Color C_GreenDk     = Hex("#13452B");
+    static readonly Color C_Red         = Hex("#CF3E3E");
+    static readonly Color C_Text        = Hex("#E2E6F5");
+    static readonly Color C_Sub         = Hex("#7882A4");
+    static readonly Color C_Locked      = Hex("#0A0C16");
+    static readonly Color C_LckTxt      = Hex("#2C3044");
+    static readonly Color C_HdrBg       = Hex("#06080E");
+    static readonly Color C_MorBg       = Hex("#080A12");
+    static readonly Color C_DetBgTop    = Hex("#0d1a12"); 
+    static readonly Color C_DetBgBot    = Hex("#080f0a"); 
+    static readonly Color C_UpgBtn      = Hex("#c9a227");
+    static readonly Color C_InfoBtn     = Hex("#0E1428");
+    static readonly Color C_Divider     = Hex("#141A30");
+    static readonly Color C_TealActive  = Hex("#2a8a8a"); // Muted teal
+    static readonly Color C_GrayDk      = Hex("#1a1a1a"); // Dim inactive paths
+    
+    // Strict Banner Color System
+    static readonly Color B_Combat      = Hex("#1a4d2a");
+    static readonly Color B_Support     = Hex("#1a3a4d");
+    static readonly Color B_Special     = Hex("#4d1a1a");
+    static readonly Color B_Locked      = Hex("#2a2a2a");
 
-    // ── layout constants ──────────────────────────────────────────────────────
-    private const float HeaderH   = 110f;
-    private const float MapRight  = 0.60f;   // left 60% = map, right 40% = detail
-    private const float CardW     = 220f;
-    private const float CardH     = 160f;
-    private const float CardPad   = 14f;
-    private const float DetailPad = 20f;
+    // ── Layout Constants ──────────────────────────────────────────────────────
+    const float HdrH    = 92f;     
+    const float MorBarH = 48f;     
+    const float DetFrac = 0.42f;   // Increased right detail panel width slightly for readability (42% width)
+    const float DP      = 24f;     
 
-    // ── runtime state ─────────────────────────────────────────────────────────
-    private IFacilityService  _facilityService;
-    private ICurrencyService  _currencyService;
-    private IRosterService    _rosterService;
+    // ── Services ──────────────────────────────────────────────────────────────
+    IFacilityService _fac;
+    ICurrencyService _cur;
+    IRosterService   _ros;
 
-    private RectTransform     _mapArea;
-    private RectTransform     _detailPanel;
-    private bool              _detailVisible = false;
-    private string            _selectedId    = null;
+    // ── UI Roots ──────────────────────────────────────────────────────────────
+    RectTransform _mapRoot;
+    RectTransform _detRoot;
 
-    private readonly List<FacilityCardWidget> _cards = new List<FacilityCardWidget>();
+    // Detail-panel widgets
+    TextMeshProUGUI _dName, _dLevel, _dDesc;
+    TextMeshProUGUI _dCurBonusLabel, _dCurBonusValue;
+    TextMeshProUGUI _dNxtBonusLabel, _dNxtBonusValue;
+    TextMeshProUGUI _dCostTxt;
+    Button          _btnUpg;
+    TextMeshProUGUI _btnUpgTxt;
+    TextMeshProUGUI _btnUpgErr; 
+    Image           _detArtBg;
 
-    // detail panel widgets
-    private Image             _detailBg;
-    private TextMeshProUGUI   _detailName;
-    private TextMeshProUGUI   _detailRole;
-    private TextMeshProUGUI   _detailEmotion;
-    private TextMeshProUGUI   _detailLevel;
-    private Image             _levelBarFill;
-    private TextMeshProUGUI   _detailBenefit;
-    private TextMeshProUGUI   _detailNextBenefit;
-    private TextMeshProUGUI   _detailCost;
-    private TextMeshProUGUI   _detailWarning;
-    private Button            _upgradeButton;
-    private TextMeshProUGUI   _upgradeBtnText;
+    // Morale bar
+    Image           _morFill;
+    TextMeshProUGUI _morTxt;
 
-    // dock sub-panel
-    private GameObject        _dockSubPanel;
-    private TextMeshProUGUI   _dockStatus;
-    private Button            _btnRecon;
-    private Button            _btnSupply;
-    private Button            _btnExtraction;
-    private Button            _btnLaunch;
+    // Header currency labels
+    TextMeshProUGUI _lblGold, _lblGems, _lblMor;
 
-    // header widgets
-    private TextMeshProUGUI   _goldLabel;
-    private TextMeshProUGUI   _gemsLabel;
-    private TextMeshProUGUI   _moraleLabel;
+    // Additional Detail Widgets
+    TextMeshProUGUI _dPower, _dUnlocks, _dLore;
 
-    // ── Unity lifecycle ───────────────────────────────────────────────────────
-    private void Start()
+    // ── State ─────────────────────────────────────────────────────────────────
+    string _selId;
+    readonly List<FacilityBuildingCard>    _bldCards = new List<FacilityBuildingCard>();
+    readonly Dictionary<string, Coroutine> _pulses   = new Dictionary<string, Coroutine>();
+    readonly List<PathSegmentWidget>       _paths     = new List<PathSegmentWidget>();
+    Coroutine _upgBtnPulse;
+
+    // ─────────────────────────────────────────────────────────────────────────
+    //  LIFECYCLE
+    // ─────────────────────────────────────────────────────────────────────────
+    void Start()
     {
-        _facilityService = ServiceRegistry.Instance.Resolve<IFacilityService>();
-        _currencyService = ServiceRegistry.Instance.Resolve<ICurrencyService>();
-        _rosterService   = ServiceRegistry.Instance.Resolve<IRosterService>();
+        _fac = ServiceRegistry.Instance.Resolve<IFacilityService>();
+        _cur = ServiceRegistry.Instance.Resolve<ICurrencyService>();
+        _ros = ServiceRegistry.Instance.Resolve<IRosterService>();
 
         BuildUI();
-        PopulateMap();
+        PopulateCitadelMap();
         RefreshHeader();
-        SetDetailVisible(false);
+        RefreshMoraleBar();
+
+        // Default selection: Workshop / Command Center
+        if (_fac?.GetFacility("workshop") != null)
+            SelectBuilding("workshop");
     }
 
-    private void OnEnable()
+    void OnEnable()
     {
-        if (_currencyService != null) RefreshHeader();
+        if (_cur != null) { RefreshHeader(); RefreshMoraleBar(); }
     }
 
-    // ── UI construction ───────────────────────────────────────────────────────
-    private void BuildUI()
+    // ─────────────────────────────────────────────────────────────────────────
+    //  BUILD UI
+    // ─────────────────────────────────────────────────────────────────────────
+    void BuildUI()
     {
-        // root canvas background
-        Canvas canvas = GetComponent<Canvas>() ?? gameObject.AddComponent<Canvas>();
+        var canvas = GetComponent<Canvas>() ?? gameObject.AddComponent<Canvas>();
         canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-        CanvasScaler scaler = GetComponent<CanvasScaler>() ?? gameObject.AddComponent<CanvasScaler>();
-        scaler.uiScaleMode          = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-        scaler.referenceResolution  = new Vector2(1080, 2340);
-        scaler.matchWidthOrHeight   = 0.5f;
+        var scaler = GetComponent<CanvasScaler>() ?? gameObject.AddComponent<CanvasScaler>();
+        scaler.uiScaleMode         = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+        scaler.referenceResolution = new Vector2(2340, 1080);
+        scaler.matchWidthOrHeight  = 0.5f;
         if (GetComponent<GraphicRaycaster>() == null) gameObject.AddComponent<GraphicRaycaster>();
 
-        // full-screen bg
-        RectTransform root = GetOrAddRectTransform(gameObject);
+        var root = GetOrAdd<RectTransform>(gameObject);
         Stretch(root);
-        AddImage(root, ColBg);
+        AddImg(root, C_BgDeep);
 
+        BuildAtmosphere(root);
         BuildHeader(root);
-        BuildMapAndDetail(root);
+        BuildMoraleBar(root);
+        BuildColumns(root);
     }
 
-    private void BuildHeader(RectTransform root)
+    void BuildAtmosphere(RectTransform root)
     {
-        GameObject header = NewGO("Header", root);
-        RectTransform hrt = header.GetComponent<RectTransform>();
-        hrt.anchorMin = new Vector2(0, 1);
-        hrt.anchorMax = new Vector2(1, 1);
-        hrt.pivot     = new Vector2(0.5f, 1);
-        hrt.offsetMin = Vector2.zero;
-        hrt.offsetMax = Vector2.zero;
-        hrt.sizeDelta = new Vector2(0, HeaderH);
-        AddImage(hrt, ColHeaderBg);
+        // Background texture layer: radial gradient + faint scanline pattern (3% opacity)
+        var bgGo = NewGO("CitadelBackground", root);
+        var bgRt = bgGo.GetComponent<RectTransform>();
+        Stretch(bgRt);
+        var bgImg = bgGo.AddComponent<Image>();
+        
+        Texture2D tex = new Texture2D(64, 64);
+        Color centerC = Hex("#0d1a12");
+        Color edgeC   = Hex("#050a08");
+        for (int y = 0; y < 64; y++)
+        {
+            for (int x = 0; x < 64; x++)
+            {
+                float dx = (x - 32f) / 32f;
+                float dy = (y - 32f) / 32f;
+                float dist = Mathf.Clamp01(Mathf.Sqrt(dx * dx + dy * dy));
+                Color c = Color.Lerp(centerC, edgeC, dist);
+                
+                // Add a very faint scanline pattern (horizontal grid lines every 4 pixels at 3% opacity overlay)
+                if (y % 4 == 0)
+                {
+                    c = Color.Lerp(c, Color.white, 0.03f);
+                }
+                tex.SetPixel(x, y, c);
+            }
+        }
+        tex.Apply();
+        bgImg.sprite = Sprite.Create(tex, new Rect(0, 0, 64, 64), new Vector2(0.5f, 0.5f));
+        bgImg.raycastTarget = false;
 
-        // separator line at bottom of header
-        GameObject sep = NewGO("HeaderSep", hrt);
-        RectTransform sepRt = sep.GetComponent<RectTransform>();
-        sepRt.anchorMin = new Vector2(0, 0);
-        sepRt.anchorMax = new Vector2(1, 0);
-        sepRt.pivot     = new Vector2(0.5f, 0);
-        sepRt.sizeDelta = new Vector2(0, 2);
-        sepRt.anchoredPosition = Vector2.zero;
-        AddImage(sepRt, ColGold);
-
-        // BACK button
-        Button back = MakeButton("Back", "BACK", 18, hrt,
-            new Vector2(0, 0), new Vector2(0, 1), new Vector2(0.5f, 0.5f));
-        RectTransform backRt = back.GetComponent<RectTransform>();
-        backRt.sizeDelta         = new Vector2(120, 54);
-        backRt.anchoredPosition  = new Vector2(70, 0);
-        StyleButton(back, ColCardBorder, ColGold);
-        back.onClick.AddListener(() => SceneManager.LoadScene("Hub"));
-
-        // Title label centred
-        GameObject titleGo = NewGO("Title", hrt);
-        RectTransform titleRt = titleGo.GetComponent<RectTransform>();
-        titleRt.anchorMin = new Vector2(0.3f, 0);
-        titleRt.anchorMax = new Vector2(0.7f, 1);
-        titleRt.offsetMin = titleRt.offsetMax = Vector2.zero;
-        TextMeshProUGUI title = titleGo.AddComponent<TextMeshProUGUI>();
-        title.text      = "HEADQUARTERS";
-        title.fontSize  = 28;
-        title.fontStyle = FontStyles.Bold;
-        title.color     = ColGold;
-        title.alignment = TextAlignmentOptions.Center;
-
-        // currency row – right side
-        float iconX = 1080 - 20;
-        _moraleLabel = MakeCurrencyLabel(hrt, "Morale", ref iconX, ColMorale);
-        _gemsLabel   = MakeCurrencyLabel(hrt, "Gems",   ref iconX, ColGem);
-        _goldLabel   = MakeCurrencyLabel(hrt, "Gold",   ref iconX, ColGold);
+        // Ground Fog
+        AddImg(MkRect("Atm_Fog", root, 0f, 0f, 0.62f, 0.40f), new Color(0.03f, 0.04f, 0.08f, 0.40f)).raycastTarget = false;
     }
 
-    // Returns a TMP label placed from the right side of the header
-    private TextMeshProUGUI MakeCurrencyLabel(RectTransform parent, string name, ref float rightEdgeX, Color col)
+    void BuildHeader(RectTransform root)
     {
-        float w = 180f;
-        float h = 44f;
-        GameObject go = NewGO("Curr_" + name, parent);
-        RectTransform rt = go.GetComponent<RectTransform>();
-        rt.anchorMin = new Vector2(1, 0.5f);
-        rt.anchorMax = new Vector2(1, 0.5f);
-        rt.pivot     = new Vector2(1, 0.5f);
-        rt.sizeDelta = new Vector2(w, h);
-        rt.anchoredPosition = new Vector2(-(1080 - rightEdgeX + 10), 0);
-        rightEdgeX -= (w + 8);
+        var hdr = MkRect("Header", root, 0, 1, 1, 1);
+        hdr.pivot = new Vector2(0.5f, 1);
+        hdr.sizeDelta = new Vector2(0, HdrH);
+        hdr.anchoredPosition = Vector2.zero;
+        AddImg(hdr, C_HdrBg);
 
-        // small coloured background pill
-        Image bg = go.AddComponent<Image>();
-        bg.color = new Color(col.r * 0.2f, col.g * 0.2f, col.b * 0.2f, 0.6f);
+        var sep = MkRect("HdrSep", hdr, 0, 0, 1, 0);
+        sep.pivot = new Vector2(0.5f, 0); sep.sizeDelta = new Vector2(0, 2);
+        AddImg(sep, C_Gold);
 
-        // prefix label
-        GameObject prefGo = NewGO("Prefix", rt);
-        RectTransform prefRt = prefGo.GetComponent<RectTransform>();
-        prefRt.anchorMin = new Vector2(0, 0);
-        prefRt.anchorMax = new Vector2(0.38f, 1);
-        prefRt.offsetMin = prefRt.offsetMax = Vector2.zero;
-        TextMeshProUGUI pref = prefGo.AddComponent<TextMeshProUGUI>();
-        pref.text      = name.ToUpper()[0].ToString();
-        pref.fontSize  = 18;
-        pref.color     = col;
-        pref.alignment = TextAlignmentOptions.Center;
-        pref.fontStyle = FontStyles.Bold;
+        // BACK button with Arrow icon + Text (<- BACK)
+        var backGo = NewGO("Back", hdr);
+        var backRt = backGo.GetComponent<RectTransform>();
+        backRt.anchorMin = new Vector2(0, 0.5f); backRt.anchorMax = new Vector2(0, 0.5f);
+        backRt.pivot = new Vector2(0, 0.5f);
+        backRt.sizeDelta = new Vector2(140, 50);
+        backRt.anchoredPosition = new Vector2(16, 0);
+        AddImg(backRt, Hex("#121422"));
+        var bkBdr = MkRect("Bdr", backRt, 0, 0, 1, 0);
+        bkBdr.pivot = new Vector2(0.5f, 0); bkBdr.sizeDelta = new Vector2(0, 2);
+        AddImg(bkBdr, C_GoldDim);
+        var backBtn = backGo.AddComponent<Button>();
+        var backTxt = MkLbl("T", backRt, 15, FontStyles.Bold, C_Gold, TextAlignmentOptions.Center);
+        Stretch(backTxt.rectTransform); backTxt.text = "<- BACK";
+        backBtn.onClick.AddListener(() => SceneManager.LoadScene("Hub"));
 
-        // value label
-        GameObject valGo = NewGO("Value", rt);
-        RectTransform valRt = valGo.GetComponent<RectTransform>();
-        valRt.anchorMin = new Vector2(0.38f, 0);
-        valRt.anchorMax = new Vector2(1, 1);
-        valRt.offsetMin = new Vector2(4, 0);
-        valRt.offsetMax = Vector2.zero;
-        TextMeshProUGUI val = valGo.AddComponent<TextMeshProUGUI>();
-        val.text      = "0";
-        val.fontSize  = 18;
-        val.color     = ColText;
-        val.alignment = TextAlignmentOptions.Left;
+        // Title
+        var title = MkLbl("Title", hdr, 26, FontStyles.Bold, C_Gold, TextAlignmentOptions.Center);
+        var trt = title.rectTransform;
+        trt.anchorMin = new Vector2(0.12f, 0.08f);
+        trt.anchorMax = new Vector2(0.48f, 0.92f);
+        trt.offsetMin = trt.offsetMax = Vector2.zero;
+        title.text = "CITADEL HEADQUARTERS";
 
+        // Resource panels: separate units with 4px gaps
+        _lblGold = MakeSeparatedCurrencyChip(hdr, "• GOLD", C_Gold,  0.49f, 0.62f);
+        _lblGems = MakeSeparatedCurrencyChip(hdr, "• GEMS", C_Gem,   0.622f, 0.75f);
+        _lblMor  = MakeSeparatedCurrencyChip(hdr, "• MORALE", C_Green, 0.752f, 0.88f);
+    }
+
+    TextMeshProUGUI MakeSeparatedCurrencyChip(RectTransform parent, string title, Color col, float x0, float x1)
+    {
+        var chip = MkRect("Chip_" + title, parent, x0, 0.15f, x1, 0.85f);
+        AddImg(chip, new Color(col.r * 0.08f, col.g * 0.08f, col.b * 0.08f, 0.90f));
+
+        var iconBdr = MkRect("Bdr", chip, 0, 0, 1, 1);
+        iconBdr.offsetMin = new Vector2(-1, -1); iconBdr.offsetMax = new Vector2(1, 1);
+        AddImg(iconBdr, new Color(col.r * 0.4f, col.g * 0.4f, col.b * 0.4f, 0.5f)).raycastTarget = false;
+
+        var ic = MkLbl("Lbl", chip, 11, FontStyles.Bold, col, TextAlignmentOptions.Center);
+        ic.rectTransform.anchorMin = new Vector2(0, 0);
+        ic.rectTransform.anchorMax = new Vector2(0.38f, 1);
+        ic.rectTransform.offsetMin = ic.rectTransform.offsetMax = Vector2.zero;
+        ic.text = title;
+
+        var val = MkLbl("Val", chip, 15, FontStyles.Bold, C_Text, TextAlignmentOptions.Left);
+        val.rectTransform.anchorMin = new Vector2(0.38f, 0);
+        val.rectTransform.anchorMax = new Vector2(1, 1);
+        val.rectTransform.offsetMin = new Vector2(6, 0);
+        val.rectTransform.offsetMax = Vector2.zero;
+        val.text = "0";
         return val;
     }
 
-    private void BuildMapAndDetail(RectTransform root)
+    void BuildMoraleBar(RectTransform root)
     {
-        // ── MAP AREA (left 60%) ───────────────────────────────────────────────
-        GameObject mapGo = NewGO("MapArea", root);
-        _mapArea = mapGo.GetComponent<RectTransform>();
-        _mapArea.anchorMin = new Vector2(0, 0);
-        _mapArea.anchorMax = new Vector2(MapRight, 1);
-        _mapArea.offsetMin = new Vector2(0, 0);
-        _mapArea.offsetMax = new Vector2(0, -HeaderH);
+        var bar = MkRect("MoraleBar", root, 0, 1, 1, 1);
+        bar.pivot = new Vector2(0.5f, 1);
+        bar.sizeDelta = new Vector2(0, MorBarH);
+        bar.anchoredPosition = new Vector2(0, -HdrH);
+        AddImg(bar, C_MorBg);
 
-        // ── DETAIL PANEL (right 40%) ─────────────────────────────────────────
-        GameObject detailGo = NewGO("DetailPanel", root);
-        _detailPanel = detailGo.GetComponent<RectTransform>();
-        _detailPanel.anchorMin = new Vector2(MapRight, 0);
-        _detailPanel.anchorMax = new Vector2(1, 1);
-        _detailPanel.offsetMin = Vector2.zero;
-        _detailPanel.offsetMax = new Vector2(0, -HeaderH);
-        AddImage(_detailPanel, ColDetailBg);
+        // Increased left padding on "FORTRESS MORALE" label
+        var lbl = MkLbl("Lbl", bar, 12, FontStyles.Bold, C_Sub, TextAlignmentOptions.Left);
+        lbl.rectTransform.anchorMin = new Vector2(0, 0);
+        lbl.rectTransform.anchorMax = new Vector2(0.15f, 1);
+        lbl.rectTransform.offsetMin = new Vector2(24, 0); // 24px left padding
+        lbl.rectTransform.offsetMax = Vector2.zero;
+        lbl.text = "FORTRESS MORALE";
 
-        // vertical separator
-        GameObject vsep = NewGO("VSep", root);
-        RectTransform vsepRt = vsep.GetComponent<RectTransform>();
-        vsepRt.anchorMin = new Vector2(MapRight, 0);
-        vsepRt.anchorMax = new Vector2(MapRight, 1);
-        vsepRt.offsetMin = new Vector2(-1, -HeaderH);
-        vsepRt.offsetMax = new Vector2(1, -HeaderH);
-        AddImage(vsepRt, ColDivider);
+        // Bar start offset increased to accommodate label padding
+        var segArea = MkRect("Segs", bar, 0.17f, 0.35f, 0.72f, 0.65f);
+        AddImg(segArea, C_LckTxt); 
 
-        BuildDetailPanel(_detailPanel);
+        var fillRt = MkRect("Fill", segArea, 0f, 0f, 0f, 1f); 
+        _morFill = AddImg(fillRt, C_Green);
+
+        _morTxt = MkLbl("Val", bar, 13, FontStyles.Bold, C_Text, TextAlignmentOptions.Right);
+        _morTxt.rectTransform.anchorMin = new Vector2(0.72f, 0);
+        _morTxt.rectTransform.anchorMax = new Vector2(1, 1);
+        _morTxt.rectTransform.offsetMin = Vector2.zero;
+        _morTxt.rectTransform.offsetMax = new Vector2(-24, 0); // increased right padding
+        _morTxt.text = "0 / 100";
     }
 
-    private void BuildDetailPanel(RectTransform parent)
+    void BuildColumns(RectTransform root)
     {
-        float p = DetailPad;
+        float yOff = -(HdrH + MorBarH);
 
-        // "tap a building" placeholder
-        GameObject placeholder = NewGO("Placeholder", parent);
-        RectTransform phRt = placeholder.GetComponent<RectTransform>();
-        phRt.anchorMin = new Vector2(0, 0.35f);
-        phRt.anchorMax = new Vector2(1, 0.65f);
-        phRt.offsetMin = phRt.offsetMax = Vector2.zero;
-        TextMeshProUGUI phTxt = placeholder.AddComponent<TextMeshProUGUI>();
-        phTxt.text      = "Tap a building\nto inspect it";
-        phTxt.fontSize  = 20;
-        phTxt.color     = ColSubText;
-        phTxt.alignment = TextAlignmentOptions.Center;
-        phTxt.name      = "DetailPlaceholder";
+        // Map area (left 62 %)
+        var mapGo = NewGO("MapArea", root);
+        _mapRoot = mapGo.GetComponent<RectTransform>();
+        _mapRoot.anchorMin = new Vector2(0, 0);
+        _mapRoot.anchorMax = new Vector2(1f - DetFrac, 1);
+        _mapRoot.offsetMin = new Vector2(0, 0);
+        _mapRoot.offsetMax = new Vector2(0, yOff);
 
-        // ── content root (hidden until selection) ────────────────────────────
-        GameObject content = NewGO("DetailContent", parent);
-        RectTransform cRt = content.GetComponent<RectTransform>();
-        Stretch(cRt);
-        content.name = "DetailContent";
-
-        float yOff = -p;
-
-        // facility name
-        _detailName = MakeLabel("DetName", content.transform, 26, FontStyles.Bold, ColGold, TextAlignmentOptions.Center);
-        PositionLabel(_detailName.rectTransform, 0, yOff, 0, 40); yOff -= 44;
-
-        // role badge
-        _detailRole = MakeLabel("DetRole", content.transform, 14, FontStyles.Normal, ColSubText, TextAlignmentOptions.Center);
-        PositionLabel(_detailRole.rectTransform, 0, yOff, 0, 26); yOff -= 30;
-
-        // divider
-        MakeDivider(content.transform, yOff); yOff -= 18;
-
-        // level progress row
-        _detailLevel = MakeLabel("DetLevel", content.transform, 18, FontStyles.Bold, ColText, TextAlignmentOptions.Left);
-        PositionLabel(_detailLevel.rectTransform, p, yOff, -p, 28); yOff -= 32;
-
-        // level bar bg
-        GameObject barBg = NewGO("LvBarBg", content.transform);
-        RectTransform barBgRt = barBg.GetComponent<RectTransform>();
-        barBgRt.anchorMin = new Vector2(0, 1);
-        barBgRt.anchorMax = new Vector2(1, 1);
-        barBgRt.pivot     = new Vector2(0, 1);
-        barBgRt.offsetMin = new Vector2(p, 0);
-        barBgRt.offsetMax = new Vector2(-p, 0);
-        barBgRt.sizeDelta = new Vector2(0, 10);
-        barBgRt.anchoredPosition = new Vector2(p, yOff);
-        AddImage(barBgRt, ColCardBorder);
-
-        // fill
-        GameObject barFill = NewGO("LvBarFill", barBg.transform);
-        RectTransform fillRt = barFill.GetComponent<RectTransform>();
-        fillRt.anchorMin = new Vector2(0, 0);
-        fillRt.anchorMax = new Vector2(0.5f, 1);
-        fillRt.offsetMin = fillRt.offsetMax = Vector2.zero;
-        _levelBarFill = barFill.AddComponent<Image>();
-        _levelBarFill.color = ColGold;
-        yOff -= 18;
-
-        // benefit row
-        _detailBenefit = MakeLabel("DetBenefit", content.transform, 16, FontStyles.Normal, ColText, TextAlignmentOptions.Left);
-        PositionLabel(_detailBenefit.rectTransform, p, yOff, -p, 22); yOff -= 26;
-
-        _detailNextBenefit = MakeLabel("DetNextBen", content.transform, 14, FontStyles.Normal, ColUpgradeHi, TextAlignmentOptions.Left);
-        PositionLabel(_detailNextBenefit.rectTransform, p, yOff, -p, 20); yOff -= 26;
-
-        // divider
-        MakeDivider(content.transform, yOff); yOff -= 18;
-
-        // emotion / flavour
-        _detailEmotion = MakeLabel("DetEmotion", content.transform, 14, FontStyles.Italic, ColSubText, TextAlignmentOptions.Left);
-        _detailEmotion.textWrappingMode = TextWrappingModes.Normal;
-        PositionLabel(_detailEmotion.rectTransform, p, yOff, -p, 60); yOff -= 68;
-
-        // divider
-        MakeDivider(content.transform, yOff); yOff -= 18;
-
-        // cost label
-        _detailCost = MakeLabel("DetCost", content.transform, 16, FontStyles.Normal, ColGold, TextAlignmentOptions.Left);
-        PositionLabel(_detailCost.rectTransform, p, yOff, -p, 26); yOff -= 30;
-
-        // warning / status
-        _detailWarning = MakeLabel("DetWarning", content.transform, 13, FontStyles.Normal, ColSubText, TextAlignmentOptions.Left);
-        _detailWarning.textWrappingMode = TextWrappingModes.Normal;
-        PositionLabel(_detailWarning.rectTransform, p, yOff, -p, 40); yOff -= 48;
-
-        // UPGRADE button – fixed to bottom of panel
-        GameObject upgGo = NewGO("UpgradeBtn", content.transform);
-        RectTransform upgRt = upgGo.GetComponent<RectTransform>();
-        upgRt.anchorMin = new Vector2(0, 0);
-        upgRt.anchorMax = new Vector2(1, 0);
-        upgRt.pivot     = new Vector2(0.5f, 0);
-        upgRt.offsetMin = new Vector2(p, p);
-        upgRt.offsetMax = new Vector2(-p, p + 70);
-        _upgradeButton  = upgGo.AddComponent<Button>();
-        Image upgImg    = upgGo.AddComponent<Image>();
-        upgImg.color    = ColUpgrade;
-
-        // button border highlight
-        GameObject upgBorder = NewGO("UpgBorder", upgGo.transform);
-        RectTransform ubRt = upgBorder.GetComponent<RectTransform>();
-        ubRt.anchorMin = new Vector2(0, 0);
-        ubRt.anchorMax = new Vector2(1, 0);
-        ubRt.pivot     = new Vector2(0.5f, 0);
-        ubRt.sizeDelta = new Vector2(0, 3);
-        ubRt.anchoredPosition = Vector2.zero;
-        AddImage(ubRt, ColUpgradeHi);
-
-        _upgradeBtnText = MakeLabel("UpgText", upgGo.transform, 22, FontStyles.Bold, ColText, TextAlignmentOptions.Center);
-        Stretch(_upgradeBtnText.rectTransform);
-        _upgradeBtnText.text = "UPGRADE";
-        _upgradeButton.onClick.AddListener(OnUpgradePressed);
-
-        // ── DOCK sub-panel ────────────────────────────────────────────────────
-        BuildDockSubPanel(content.transform, yOff);
-
-        // hide content by default; placeholder is shown
-        content.SetActive(false);
-        content.name = "DetailContent";
-        placeholder.name = "DetailPlaceholder";
-    }
-
-    private void BuildDockSubPanel(Transform parent, float yStart)
-    {
-        _dockSubPanel = NewGO("DockPanel", parent);
-        RectTransform dpRt = _dockSubPanel.GetComponent<RectTransform>();
-        dpRt.anchorMin = new Vector2(0, 0.30f);
-        dpRt.anchorMax = new Vector2(1, 0.62f);
-        dpRt.offsetMin = new Vector2(DetailPad, 0);
-        dpRt.offsetMax = new Vector2(-DetailPad, 0);
-        AddImage(dpRt, Hex("#0D1020"));
-
-        float p = 10f;
-        float y = -p;
-
-        _dockStatus = MakeLabel("DockStatus", _dockSubPanel.transform, 15, FontStyles.Bold, ColSubText, TextAlignmentOptions.Center);
-        PositionLabel(_dockStatus.rectTransform, 0, y, 0, 24); y -= 28;
-
-        _btnRecon      = MakeSortieButton("Recon",     DockSortieType.Recon,      _dockSubPanel.transform, y); y -= 54;
-        _btnSupply     = MakeSortieButton("Supply",    DockSortieType.Supply,     _dockSubPanel.transform, y); y -= 54;
-        _btnExtraction = MakeSortieButton("Extraction",DockSortieType.Extraction, _dockSubPanel.transform, y); y -= 60;
-
-        // Launch button
-        GameObject lGo = NewGO("LaunchBtn", _dockSubPanel.transform);
-        RectTransform lRt = lGo.GetComponent<RectTransform>();
-        lRt.anchorMin = new Vector2(0, 1);
-        lRt.anchorMax = new Vector2(1, 1);
-        lRt.pivot     = new Vector2(0.5f, 1);
-        lRt.offsetMin = new Vector2(p, 0);
-        lRt.offsetMax = new Vector2(-p, 0);
-        lRt.sizeDelta = new Vector2(0, 50);
-        lRt.anchoredPosition = new Vector2(0, y);
-        _btnLaunch = lGo.AddComponent<Button>();
-        AddImage(lRt, Hex("#1A4A2A"));
-        TextMeshProUGUI lt = MakeLabel("LText", lGo.transform, 18, FontStyles.Bold, ColUpgradeHi, TextAlignmentOptions.Center);
-        Stretch(lt.rectTransform);
-        lt.text = "LAUNCH SORTIE";
-        _btnLaunch.onClick.AddListener(LaunchSortie);
-
-        _dockSubPanel.SetActive(false);
-    }
-
-    private Button MakeSortieButton(string label, DockSortieType type, Transform parent, float y)
-    {
-        GameObject go = NewGO("Sort_" + label, parent);
-        RectTransform rt = go.GetComponent<RectTransform>();
-        rt.anchorMin = new Vector2(0, 1);
-        rt.anchorMax = new Vector2(1, 1);
-        rt.pivot     = new Vector2(0.5f, 1);
-        rt.offsetMin = new Vector2(DetailPad, 0);
-        rt.offsetMax = new Vector2(-DetailPad, 0);
-        rt.sizeDelta = new Vector2(0, 46);
-        rt.anchoredPosition = new Vector2(0, y);
-        Button btn = go.AddComponent<Button>();
-        AddImage(rt, ColCardBorder);
-        TextMeshProUGUI txt = MakeLabel("T", go.transform, 16, FontStyles.Normal, ColText, TextAlignmentOptions.Center);
-        Stretch(txt.rectTransform);
-        txt.text = label.ToUpperInvariant();
-        btn.onClick.AddListener(() => {
-            _facilityService?.ToggleSortieType(type);
-            RefreshDockPanel();
-        });
-        return btn;
-    }
-
-    // ── Map population ────────────────────────────────────────────────────────
-    private void PopulateMap()
-    {
-        // Destroy any previously built scroll root first
-        foreach (Transform child in _mapArea)
+        // Detail panel (right 38 %) - Gradient background setup
+        var detGo = NewGO("Detail", root);
+        _detRoot = detGo.GetComponent<RectTransform>();
+        _detRoot.anchorMin = new Vector2(1f - DetFrac, 0);
+        _detRoot.anchorMax = new Vector2(1, 1);
+        _detRoot.offsetMin = Vector2.zero;
+        _detRoot.offsetMax = new Vector2(0, yOff);
+        
+        var detImg = _detRoot.gameObject.AddComponent<Image>();
+        Texture2D detGrad = new Texture2D(1, 16);
+        for (int i = 0; i < 16; i++)
         {
-            Destroy(child.gameObject);
+            detGrad.SetPixel(0, i, Color.Lerp(C_DetBgBot, C_DetBgTop, (float)i / 15f));
         }
-        _cards.Clear();
+        detGrad.Apply();
+        detImg.sprite = Sprite.Create(detGrad, new Rect(0, 0, 1, 16), new Vector2(0.5f, 0.5f));
 
-        if (_facilityService == null) return;
+        // Subtle left edge glow: 1px vertical line in #1a3a2a
+        var leftGlow = MkRect("LeftGlow", _detRoot, 0f, 0f, 0f, 1f);
+        leftGlow.pivot = new Vector2(0f, 0.5f);
+        leftGlow.sizeDelta = new Vector2(1f, 0f);
+        AddImg(leftGlow, Hex("#1a3a2a"));
 
-        List<FacilityDefinition> defs = _facilityService.GetAllFacilities();
+        BuildDetailPanel(_detRoot);
+    }
 
-        // Layout: 2-column grid, centred in map area, with row groupings
-        // Row layout (top to bottom): Workshop | Square   /  Dorms | Training Hall  /  Memorial Hall | Crucible  /  Flying Dock | Tactical Station
-        string[][] rowLayout = new string[][]
+    void BuildDetailPanel(RectTransform panel)
+    {
+        // Art zone
+        var artGo = NewGO("ArtArea", panel);
+        _detArtBg = artGo.AddComponent<Image>();
+        _detArtBg.color = C_Card;
+        var artRt = artGo.GetComponent<RectTransform>();
+        artRt.anchorMin = new Vector2(0, 0.65f);
+        artRt.anchorMax = new Vector2(1, 1);
+        artRt.offsetMin = artRt.offsetMax = Vector2.zero;
+        BuildArtSilhouette(artRt, C_Gold);
+        
+        var fade = MkRect("ArtFade", artRt, 0, 0, 1, 0.35f);
+        AddImg(fade, new Color(C_DetBgBot.r, C_DetBgBot.g, C_DetBgBot.b, 0.95f));
+
+        // Content (adjusted with 24px padding inside)
+        var cGo = NewGO("DetailContent", panel);
+        var cRt = cGo.GetComponent<RectTransform>();
+        cRt.anchorMin = new Vector2(0, 0);
+        cRt.anchorMax = new Vector2(1, 0.65f);
+        cRt.offsetMin = cRt.offsetMax = Vector2.zero;
+
+        float y = -DP;
+        // Bolder / larger command title
+        _dName  = PosLbl("Name",  cRt, 31, FontStyles.Bold,   C_Gold, TextAlignmentOptions.Left, DP, y, -DP, 38); y -= 42;
+        // Muted gray level on own line (enlarged)
+        _dLevel = PosLbl("Level", cRt, 16, FontStyles.Normal,  C_Sub,  TextAlignmentOptions.Left, DP, y, -DP, 22); y -= 26;
+        _dDesc  = PosLbl("Desc",  cRt, 14, FontStyles.Italic,  C_Sub,  TextAlignmentOptions.Left, DP, y, -DP, 44); y -= 50;
+        _dDesc.textWrappingMode = TextWrappingModes.Normal;
+        _dDesc.lineSpacing = 20f; // Add spacing on multi-line text
+
+        MkDivider(cRt, y); y -= 12;
+
+        // Side-by-side columns
+        var colContainer = MkRect("BonusCols", cRt, 0f, 1f, 1f, 1f);
+        colContainer.pivot = new Vector2(0.5f, 1f);
+        colContainer.sizeDelta = new Vector2(0f, 70f); // Sized up container slightly
+        colContainer.anchoredPosition = new Vector2(0f, y);
+        y -= 80;
+
+        var col1 = MkRect("Col1", colContainer, 0.05f, 0f, 0.48f, 1f);
+        _dCurBonusLabel = MkLbl("CurH", col1, 12, FontStyles.Bold, C_Sub, TextAlignmentOptions.Left); // Sized up 20%
+        _dCurBonusLabel.rectTransform.anchorMin = new Vector2(0, 0.6f);
+        _dCurBonusLabel.rectTransform.anchorMax = new Vector2(1, 1);
+        _dCurBonusLabel.rectTransform.offsetMin = _dCurBonusLabel.rectTransform.offsetMax = Vector2.zero;
+        _dCurBonusLabel.text = "CURRENT BONUS";
+
+        _dCurBonusValue = MkLbl("CurV", col1, 17, FontStyles.Normal, C_Text, TextAlignmentOptions.Left); // Sized up 30%
+        _dCurBonusValue.rectTransform.anchorMin = new Vector2(0, 0f);
+        _dCurBonusValue.rectTransform.anchorMax = new Vector2(1, 0.6f);
+        _dCurBonusValue.rectTransform.offsetMin = _dCurBonusValue.rectTransform.offsetMax = Vector2.zero;
+
+        var col2 = MkRect("Col2", colContainer, 0.52f, 0f, 0.95f, 1f);
+        _dNxtBonusLabel = MkLbl("NxtH", col2, 12, FontStyles.Bold, C_Sub, TextAlignmentOptions.Left); // Sized up 20%
+        _dNxtBonusLabel.rectTransform.anchorMin = new Vector2(0, 0.6f);
+        _dNxtBonusLabel.rectTransform.anchorMax = new Vector2(1, 1);
+        _dNxtBonusLabel.rectTransform.offsetMin = _dNxtBonusLabel.rectTransform.offsetMax = Vector2.zero;
+        _dNxtBonusLabel.text = "UPGRADE BENEFIT";
+
+        _dNxtBonusValue = MkLbl("NxtV", col2, 17, FontStyles.Normal, C_Text, TextAlignmentOptions.Left); // Sized up 30%
+        _dNxtBonusValue.rectTransform.anchorMin = new Vector2(0, 0f);
+        _dNxtBonusValue.rectTransform.anchorMax = new Vector2(1, 0.6f);
+        _dNxtBonusValue.rectTransform.offsetMin = _dNxtBonusValue.rectTransform.offsetMax = Vector2.zero;
+
+        MkDivider(cRt, y); y -= 12;
+
+        var powHdr = PosLbl("PowH", cRt, 13, FontStyles.Bold, C_Gold, TextAlignmentOptions.Left, DP, y, -DP, 18); y -= 20; // Sized up 20%
+        powHdr.text = "FACILITY POWER RATING";
+        _dPower = PosLbl("PowV", cRt, 17, FontStyles.Bold, C_Text, TextAlignmentOptions.Left, DP + 8, y, -DP, 22); y -= 26; // Sized up 30%
+
+        MkDivider(cRt, y); y -= 12;
+
+        var unlHdr = PosLbl("UnlH", cRt, 13, FontStyles.Bold, C_Gem, TextAlignmentOptions.Left, DP, y, -DP, 18); y -= 20; // Sized up 20%
+        unlHdr.text = "CITADEL SYSTEM UNLOCKS";
+        _dUnlocks = PosLbl("UnlV", cRt, 17, FontStyles.Normal, C_Text, TextAlignmentOptions.Left, DP + 8, y, -DP, 22); y -= 26; // Sized up 30%
+
+        MkDivider(cRt, y); y -= 12;
+        _dCostTxt = PosLbl("Cost", cRt, 18, FontStyles.Bold, C_Gold, TextAlignmentOptions.Left, DP, y, -DP, 26); y -= 32;
+
+        // Upgrade button: flat gold, dark text, 2px darker gold bottom border
+        var upgGo = NewGO("UpgBtn", panel);
+        var upgRt = upgGo.GetComponent<RectTransform>();
+        upgRt.anchorMin = new Vector2(0, 0); upgRt.anchorMax = new Vector2(1, 0);
+        upgRt.pivot = new Vector2(0.5f, 0);
+        upgRt.offsetMin = new Vector2(DP, DP + 58f + 20f); 
+        upgRt.offsetMax = new Vector2(-DP, DP + 58f + 20f + 64f);
+        _btnUpg = upgGo.AddComponent<Button>();
+        
+        var btnImg = upgRt.gameObject.AddComponent<Image>();
+        btnImg.color = C_UpgBtn; // Flat Gold #c9a227
+
+        // 2px darker gold bottom border for depth
+        var bottomBdr = MkRect("BottomBdr", upgRt, 0f, 0f, 1f, 0f);
+        bottomBdr.pivot = new Vector2(0.5f, 0f);
+        bottomBdr.sizeDelta = new Vector2(0f, 2f);
+        AddImg(bottomBdr, Hex("#a07d1a"));
+
+        _btnUpgTxt = MkLbl("T", upgGo.transform, 20, FontStyles.Bold, Hex("#0a0a0a"), TextAlignmentOptions.Center);
+        Stretch(_btnUpgTxt.rectTransform); _btnUpgTxt.text = "EXECUTE UPGRADE";
+        _btnUpg.onClick.AddListener(OnUpgradePressed);
+
+        _btnUpgErr = MkLbl("Err", panel, 12, FontStyles.Bold, C_Red, TextAlignmentOptions.Center);
+        var errRt = _btnUpgErr.rectTransform;
+        errRt.anchorMin = new Vector2(0f, 0f); errRt.anchorMax = new Vector2(1f, 0f);
+        errRt.pivot = new Vector2(0.5f, 0f);
+        errRt.offsetMin = new Vector2(DP, DP + 56f);
+        errRt.offsetMax = new Vector2(-DP, DP + 56f + 20f);
+        _btnUpgErr.text = "";
+
+        // Secondary Button: tactical info button styled as active secondary
+        var infoGo = NewGO("InfoBtn", panel);
+        var infoRt = infoGo.GetComponent<RectTransform>();
+        infoRt.anchorMin = new Vector2(0, 0); infoRt.anchorMax = new Vector2(1, 0);
+        infoRt.pivot = new Vector2(0.5f, 0);
+        infoRt.offsetMin = new Vector2(DP, DP);
+        infoRt.offsetMax = new Vector2(-DP, DP + 48f);
+        infoGo.AddComponent<Button>();
+        
+        var infoImg = infoRt.gameObject.AddComponent<Image>();
+        infoImg.color = C_InfoBtn;
+        
+        // 1px border #2a3a4a
+        var infoBdr = MkRect("Bdr", infoRt, 0f, 0f, 1f, 1f);
+        infoBdr.offsetMin = new Vector2(-1, -1); infoBdr.offsetMax = new Vector2(1, 1);
+        AddImg(infoBdr, Hex("#2a3a4a")).raycastTarget = false;
+        infoBdr.SetSiblingIndex(0);
+
+        var infoTxt = MkLbl("T", infoGo.transform, 15, FontStyles.Bold, Hex("#a0aec0"), TextAlignmentOptions.Center);
+        Stretch(infoTxt.rectTransform); infoTxt.text = "TACTICAL DETAILS / ASSIGN HEROES";
+
+        // Placeholder
+        var ph = MkLbl("DetailPlaceholder", panel, 16, FontStyles.Italic, C_Sub, TextAlignmentOptions.Center);
+        ph.rectTransform.anchorMin = new Vector2(0, 0.3f);
+        ph.rectTransform.anchorMax = new Vector2(1, 0.7f);
+        ph.rectTransform.offsetMin = ph.rectTransform.offsetMax = Vector2.zero;
+        ph.text = "Select a facility from the Citadel Map\nto inspect upgrading operations.";
+
+        artGo.SetActive(false);
+        cGo.SetActive(false);
+    }
+
+    void BuildArtSilhouette(RectTransform art, Color tint)
+    {
+        Color dk  = new Color(tint.r * 0.15f, tint.g * 0.15f, tint.b * 0.15f, 0.90f);
+        Color md  = new Color(tint.r * 0.25f, tint.g * 0.25f, tint.b * 0.25f, 0.80f);
+        Color glw = new Color(tint.r * 0.18f, tint.g * 0.18f, tint.b * 0.18f, 0.50f);
+
+        AddImg(MkRect("CT",  art, 0.35f, 0.10f, 0.65f, 0.85f), dk);
+        AddImg(MkRect("CTT", art, 0.40f, 0.80f, 0.60f, 0.98f), md);
+        AddImg(MkRect("LT",  art, 0.12f, 0.20f, 0.35f, 0.70f), new Color(dk.r * 0.8f, dk.g * 0.8f, dk.b * 0.8f, 0.85f));
+        AddImg(MkRect("RT",  art, 0.65f, 0.20f, 0.88f, 0.70f), new Color(dk.r * 0.8f, dk.g * 0.8f, dk.b * 0.8f, 0.85f));
+        AddImg(MkRect("GL",  art, 0.22f, 0f, 0.78f, 0.25f), glw);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    //  CITADEL MAP POPULATION (ORGANIC/TACTICAL CITY-VIEW PATTERN)
+    // ─────────────────────────────────────────────────────────────────────────
+    void PopulateCitadelMap()
+    {
+        foreach (Transform ch in _mapRoot) Destroy(ch.gameObject);
+        _bldCards.Clear();
+        _paths.Clear();
+        StopAllCoroutines();
+        _pulses.Clear();
+        _upgBtnPulse = null;
+
+        if (_fac == null) return;
+        var defs = _fac.GetAllFacilities();
+
+        Vector2 posWorkshop = new Vector2(0.50f, 0.83f);
+        Vector2 posMemorial = new Vector2(0.20f, 0.62f);
+        Vector2 posCrucible = new Vector2(0.80f, 0.62f);
+        Vector2 posTactical = new Vector2(0.50f, 0.44f);
+        Vector2 posDorms    = new Vector2(0.20f, 0.26f);
+        Vector2 posTraining = new Vector2(0.80f, 0.26f);
+        Vector2 posSquare   = new Vector2(0.50f, 0.10f);
+        Vector2 posFlying   = new Vector2(0.84f, 0.44f);
+
+        // Draw connections first (rendered behind card layers as background connectors)
+        DrawCitadelPaths(posWorkshop, posMemorial, posCrucible, posTactical, posDorms, posTraining, posSquare, posFlying);
+
+        // Now place building cards
+        PlaceTowerCard(defs, "workshop",         posWorkshop.x, posWorkshop.y, "COMMAND CENTER", true);
+        PlaceTowerCard(defs, "memorial_hall",    posMemorial.x, posMemorial.y, "MEMORIAL HALL", false);
+        PlaceTowerCard(defs, "crucible",         posCrucible.x, posCrucible.y, "CRUCIBLE", false);
+        PlaceTowerCard(defs, "tactical_station", posTactical.x, posTactical.y, "TACTICAL STATION", false);
+        PlaceTowerCard(defs, "dorms",            posDorms.x,    posDorms.y,    "DORMS", false);
+        PlaceTowerCard(defs, "training_hall",    posTraining.x, posTraining.y, "TRAINING HALL", false);
+        PlaceTowerCard(defs, "square",           posSquare.x,   posSquare.y,   "THE SQUARE", false);
+        PlaceTowerCard(defs, "flying_dock",      posFlying.x,   posFlying.y,   "FLYING DOCK", false);
+
+        // Locked outposts
+        PlaceLockedTower("Smithy",        "UNLOCK FLOOR 15", 0.12f, 0.44f);
+        PlaceLockedTower("Barracks",      "UNLOCK FLOOR 20", 0.50f, 0.64f);
+
+        // Ambient particles
+        StartCoroutine(SpawnParticles(_mapRoot));
+    }
+
+    void DrawCitadelPaths(
+        Vector2 CC, Vector2 Mem, Vector2 Cruc, Vector2 Tac, 
+        Vector2 Dor, Vector2 Train, Vector2 Sq, Vector2 Fly)
+    {
+        // Active links (active dependencies - mute teal #2a8a8a)
+        DrawCitadelConnection(CC, Mem, "workshop", "memorial_hall", isActive: true);
+        DrawCitadelConnection(CC, Cruc, "workshop", "crucible", isActive: true);
+        DrawCitadelConnection(CC, Tac, "workshop", "tactical_station", isActive: true);
+        DrawCitadelConnection(Mem, Tac, "memorial_hall", "tactical_station", isActive: true);
+        DrawCitadelConnection(Cruc, Tac, "crucible", "tactical_station", isActive: true);
+        DrawCitadelConnection(Tac, Dor, "tactical_station", "dorms", isActive: true);
+        DrawCitadelConnection(Tac, Train, "tactical_station", "training_hall", isActive: true);
+        DrawCitadelConnection(Dor, Sq, "dorms", "square", isActive: true);
+        DrawCitadelConnection(Train, Sq, "training_hall", "square", isActive: true);
+        DrawCitadelConnection(Cruc, Fly, "crucible", "flying_dock", isActive: true);
+        DrawCitadelConnection(Tac, Fly, "tactical_station", "flying_dock", isActive: true);
+
+        // Locked dependencies (dark gray #1a1a1a)
+        DrawCitadelConnection(Mem, new Vector2(0.12f, 0.44f), "memorial_hall", "smithy", isActive: false);
+        DrawCitadelConnection(Tac, new Vector2(0.50f, 0.64f), "tactical_station", "barracks", isActive: false);
+    }
+
+    void DrawCitadelConnection(Vector2 p1, Vector2 p2, string fromId, string toId, bool isActive)
+    {
+        float mapW = 1450.8f;
+        float mapH = 944f;
+
+        Vector2 startPx = new Vector2(p1.x * mapW, p1.y * mapH);
+        Vector2 endPx   = new Vector2(p2.x * mapW, p2.y * mapH);
+
+        if (Mathf.Abs(startPx.x - endPx.x) > 10f && Mathf.Abs(startPx.y - endPx.y) > 10f)
         {
-            new string[] { "workshop",        "square"           },
-            new string[] { "dorms",           "training_hall"    },
-            new string[] { "memorial_hall",   "crucible"         },
-            new string[] { "flying_dock",     "tactical_station" }
+            Vector2 elbowPx = new Vector2(endPx.x, startPx.y);
+            DrawSegment(startPx, elbowPx, fromId, toId, isActive);
+            DrawSegment(elbowPx, endPx, fromId, toId, isActive);
+        }
+        else
+        {
+            DrawSegment(startPx, endPx, fromId, toId, isActive);
+        }
+    }
+
+    void DrawSegment(Vector2 from, Vector2 to, string fromId, string toId, bool isActive)
+    {
+        var lineGo = new GameObject("PathSeg", typeof(RectTransform), typeof(Image));
+        lineGo.transform.SetParent(_mapRoot, false);
+        lineGo.transform.SetAsFirstSibling(); // force behind cards
+        var rt = lineGo.GetComponent<RectTransform>();
+
+        Vector2 middle = Vector2.Lerp(from, to, 0.5f);
+        rt.anchorMin = rt.anchorMax = new Vector2(0f, 0f);
+        rt.pivot = new Vector2(0.5f, 0.5f);
+        rt.anchoredPosition = middle;
+
+        float dist = Vector2.Distance(from, to);
+        bool isHorizontal = Mathf.Abs(from.y - to.y) < 2f;
+        rt.sizeDelta = isHorizontal ? new Vector2(dist, 4f) : new Vector2(4f, dist);
+
+        var img = lineGo.GetComponent<Image>();
+        img.color = isActive ? C_TealActive : C_GrayDk;
+
+        _paths.Add(new PathSegmentWidget
+        {
+            FromId = fromId, ToId = toId, Img = img, IsActive = isActive
+        });
+    }
+
+    void PlaceTowerCard(List<FacilityDefinition> defs, string fid, float x, float y, string fallbackName, bool isCC)
+    {
+        var def = defs.Find(d => d?.FacilityId == fid);
+        if (def == null) return;
+
+        int level   = _fac.GetFacilityLevel(fid);
+        bool canUpg = _fac.CanUpgrade(fid);
+
+        var go = NewGO("Bld_" + fid, _mapRoot);
+        var rt = go.GetComponent<RectTransform>();
+        rt.anchorMin = rt.anchorMax = new Vector2(x, y);
+        rt.pivot = new Vector2(0.5f, 0.5f);
+        rt.sizeDelta = new Vector2(210, 160);
+
+        Color baseCol = new Color(def.FacilityColor.r * 0.08f, def.FacilityColor.g * 0.08f, def.FacilityColor.b * 0.08f, 1f);
+        var cardImg = go.AddComponent<Image>();
+        cardImg.color = baseCol;
+
+        // 1px dark drop shadow #000000 at 40% opacity at bottom edge
+        var shadowGo = NewGO("Shadow", rt);
+        var shadowRt = shadowGo.GetComponent<RectTransform>();
+        Stretch(shadowRt);
+        shadowRt.offsetMin = new Vector2(0f, -4f); shadowRt.offsetMax = new Vector2(0f, -4f);
+        shadowGo.transform.SetSiblingIndex(0);
+        AddImg(shadowRt, new Color(0f, 0f, 0f, 0.40f));
+
+        var glowGo = NewGO("Glow", rt);
+        Stretch(glowGo.GetComponent<RectTransform>());
+        glowGo.GetComponent<RectTransform>().offsetMin = new Vector2(-2, -2);
+        glowGo.GetComponent<RectTransform>().offsetMax = new Vector2(2, 2);
+        glowGo.transform.SetSiblingIndex(1);
+        var glowImg = glowGo.AddComponent<Image>();
+        glowImg.color = isCC ? C_Gold : new Color(C_CardBdr.r, C_CardBdr.g, C_CardBdr.b, 0.65f);
+
+        // Tower Graphic
+        var art = MkRect("TowerArt", rt, 0.05f, 0.35f, 0.95f, 0.95f);
+        // Thumbnail brightened by 15% to increase visibility against dark background
+        Color artBase = new Color(def.FacilityColor.r * 0.14f, def.FacilityColor.g * 0.14f, def.FacilityColor.b * 0.14f, 1f);
+        AddImg(art, artBase);
+        BuildMiniSilhouette(art, def.FacilityColor * 1.15f);
+        var artFade = MkRect("Fade", art, 0, 0, 1, 0.30f);
+        AddImg(artFade, new Color(baseCol.r, baseCol.g, baseCol.b, 0.85f));
+
+        var spire = MkRect("SpireHighlight", art, 0.47f, 0.88f, 0.53f, 0.98f);
+        AddImg(spire, def.FacilityColor);
+
+        // Card banner tint based on strict color logic
+        Color bannerColor = B_Support;
+        if (fid == "workshop" || fid == "tactical_station" || fid == "training_hall" || fid == "square") bannerColor = B_Combat;
+        else if (fid == "crucible") bannerColor = B_Special;
+
+        var topBnd = MkRect("Bnd", rt, 0f, 0.95f, 1f, 1f);
+        AddImg(topBnd, bannerColor);
+
+        // Name Tag
+        var nameLbl = MkLbl("Name", rt, 12f, FontStyles.Bold, C_Text, TextAlignmentOptions.Center);
+        nameLbl.rectTransform.anchorMin = new Vector2(0f, 0.28f);
+        nameLbl.rectTransform.anchorMax = new Vector2(1f, 0.44f);
+        nameLbl.rectTransform.offsetMin = nameLbl.rectTransform.offsetMax = Vector2.zero;
+        nameLbl.text = isCC ? "COMMAND CENTER" : def.DisplayName.ToUpperInvariant();
+
+        var lvBadge = MkRect("LvPill", rt, 0.25f, 0.04f, 0.75f, 0.24f);
+        AddImg(lvBadge, Hex("#1a1a1a"));
+        var lvLbl = MkLbl("Lv", lvBadge, 10f, FontStyles.Bold, C_Text, TextAlignmentOptions.Center);
+        Stretch(lvLbl.rectTransform);
+        lvLbl.text = "LEVEL " + level;
+
+        if (canUpg)
+        {
+            var notification = MkRect("UpgN", rt, 0.80f, 0.80f, 0.98f, 0.98f);
+            AddImg(notification, C_Green);
+            var nTxt = MkLbl("T", notification, 10f, FontStyles.Bold, Color.white, TextAlignmentOptions.Center);
+            Stretch(nTxt.rectTransform); nTxt.text = "+";
+            if (!isCC) glowImg.color = C_Green;
+        }
+
+        var btn = go.AddComponent<Button>();
+        btn.targetGraphic = cardImg;
+        var cb = btn.colors;
+        cb.highlightedColor = new Color(1.10f, 1.05f, 1.00f);
+        cb.pressedColor     = new Color(0.85f, 0.85f, 0.85f);
+        btn.colors = cb;
+        string captId = fid;
+        btn.onClick.AddListener(() => SelectBuilding(captId));
+
+        var card = new FacilityBuildingCard
+        {
+            FacilityId = fid, Root = go, GlowImg = glowImg, CardImg = cardImg, CanUpgrade = canUpg
         };
+        _bldCards.Add(card);
+        if (canUpg) StartPulse(card);
+    }
 
-        // Map area root – use a ScrollRect so many cards don't get clipped
-        GameObject scrollGo = NewGO("MapScroll", _mapArea);
-        RectTransform scrollRt = scrollGo.GetComponent<RectTransform>();
-        Stretch(scrollRt);
-        ScrollRect scroll = scrollGo.AddComponent<ScrollRect>();
-        scroll.horizontal = false;
+    void PlaceLockedTower(string name, string unlockReq, float x, float y)
+    {
+        var go = NewGO("Locked_" + name, _mapRoot);
+        var rt = go.GetComponent<RectTransform>();
+        
+        rt.anchorMin = rt.anchorMax = new Vector2(x, y);
+        rt.pivot = new Vector2(0.5f, 0.5f);
+        rt.sizeDelta = new Vector2(210, 160);
 
-        GameObject vpGo = NewGO("MapViewport", scrollRt);
-        RectTransform vpRt = vpGo.GetComponent<RectTransform>();
-        Stretch(vpRt);
-        Mask vpMask = vpGo.AddComponent<Mask>();
-        vpMask.showMaskGraphic = false;
-        Image vpImg = vpGo.AddComponent<Image>();
-        vpImg.color = Color.clear;
-        scroll.viewport = vpRt;
+        // Entire locked card feel ghosted: 40% opacity, desaturated, gray banner
+        Color lockedBg = C_Locked;
+        lockedBg.a = 0.40f;
+        AddImg(rt, lockedBg);
 
-        GameObject contentGo = NewGO("MapContent", vpRt);
-        RectTransform contentRt = contentGo.GetComponent<RectTransform>();
-        contentRt.anchorMin = new Vector2(0, 1);
-        contentRt.anchorMax = new Vector2(1, 1);
-        contentRt.pivot     = new Vector2(0.5f, 1);
-        contentRt.offsetMin = contentRt.offsetMax = Vector2.zero;
-        scroll.content = contentRt;
+        var shadowGo = NewGO("Shadow", rt);
+        var shadowRt = shadowGo.GetComponent<RectTransform>();
+        Stretch(shadowRt);
+        shadowRt.offsetMin = new Vector2(0f, -4f); shadowRt.offsetMax = new Vector2(0f, -4f);
+        shadowGo.transform.SetSiblingIndex(0);
+        AddImg(shadowRt, new Color(0f, 0f, 0f, 0.20f)); // dimmed shadow
 
-        // title label inside map
-        GameObject mapTitle = NewGO("MapTitle", contentRt);
-        RectTransform mtRt = mapTitle.GetComponent<RectTransform>();
-        mtRt.anchorMin = new Vector2(0, 1);
-        mtRt.anchorMax = new Vector2(1, 1);
-        mtRt.pivot     = new Vector2(0.5f, 1);
-        mtRt.sizeDelta = new Vector2(0, 52);
-        mtRt.anchoredPosition = Vector2.zero;
-        TextMeshProUGUI mtTxt = mapTitle.AddComponent<TextMeshProUGUI>();
-        mtTxt.text      = "COMMAND BASE";
-        mtTxt.fontSize  = 20;
-        mtTxt.fontStyle = FontStyles.Bold;
-        mtTxt.color     = ColGoldDim;
-        mtTxt.alignment = TextAlignmentOptions.Center;
+        // Padlock icon: gray at 50% opacity, no shine or glow
+        var art = MkRect("PadlockArt", rt, 0.05f, 0.35f, 0.95f, 0.95f);
+        AddImg(art, new Color(0.08f, 0.09f, 0.14f, 0.40f));
+        
+        Color padColor = Hex("#4a5568");
+        padColor.a = 0.50f;
+        var shackle = MkRect("Shackle", art, 0.40f, 0.55f, 0.60f, 0.80f);
+        AddImg(shackle, padColor);
+        var shackleCut = MkRect("Cut", shackle, 0.20f, 0f, 0.80f, 0.70f);
+        AddImg(shackleCut, new Color(0.08f, 0.09f, 0.14f, 1f));
 
-        float startY  = -60f;   // below the title label
-        float rowH    = CardH + CardPad * 2;
-        int   totalRows = rowLayout.Length;
-        float totalContentH = startY + (totalRows * rowH) + CardPad;
-        contentRt.sizeDelta = new Vector2(0, Mathf.Abs(totalContentH) + 40);
+        var lockBody = MkRect("Body", art, 0.33f, 0.25f, 0.67f, 0.58f);
+        AddImg(lockBody, padColor);
 
-        for (int r = 0; r < rowLayout.Length; r++)
+        var topBnd = MkRect("Bnd", rt, 0f, 0.95f, 1f, 1f);
+        AddImg(topBnd, B_Locked); // strict gray banner #2a2a2a
+
+        var nameLbl = MkLbl("Name", rt, 11f, FontStyles.Bold, C_LckTxt, TextAlignmentOptions.Center);
+        nameLbl.rectTransform.anchorMin = new Vector2(0f, 0.05f);
+        nameLbl.rectTransform.anchorMax = new Vector2(1f, 0.25f);
+        nameLbl.rectTransform.offsetMin = nameLbl.rectTransform.offsetMax = Vector2.zero;
+        nameLbl.text = name.ToUpperInvariant();
+
+        var trigger = go.AddComponent<EventTrigger>();
+        var entryEnter = new EventTrigger.Entry { eventID = EventTriggerType.PointerEnter };
+        entryEnter.callback.AddListener((data) => ShowTooltip(name, unlockReq, rt.anchoredPosition));
+        trigger.triggers.Add(entryEnter);
+
+        var entryExit = new EventTrigger.Entry { eventID = EventTriggerType.PointerExit };
+        entryExit.callback.AddListener((data) => HideTooltip());
+        trigger.triggers.Add(entryExit);
+    }
+
+    void ShowTooltip(string name, string req, Vector2 pos)
+    {
+        var tt = GameObject.Find("CitadelTooltip") ?? NewGO("CitadelTooltip", _mapRoot);
+        tt.name = "CitadelTooltip";
+        var rt = tt.GetComponent<RectTransform>();
+        rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0.5f);
+        rt.pivot = new Vector2(0.5f, 0f);
+        rt.sizeDelta = new Vector2(220, 80);
+        rt.anchoredPosition = pos + new Vector2(0, 95f);
+
+        var bg = GetOrAdd<Image>(tt);
+        bg.color = Hex("#0c0f16");
+        
+        var txt = tt.GetComponentInChildren<TextMeshProUGUI>() ?? MkLbl("T", tt.transform, 11, FontStyles.Bold, C_Gold, TextAlignmentOptions.Center);
+        Stretch(txt.rectTransform);
+        txt.text = name.ToUpper() + "\nRequires: " + req;
+        tt.SetActive(true);
+    }
+
+    void HideTooltip()
+    {
+        var tt = GameObject.Find("CitadelTooltip");
+        if (tt != null) tt.SetActive(false);
+    }
+
+    void BuildMiniSilhouette(RectTransform art, Color facilityColor)
+    {
+        float r = Mathf.Clamp01(facilityColor.r * 1.5f);
+        float g = Mathf.Clamp01(facilityColor.g * 1.5f);
+        float b = Mathf.Clamp01(facilityColor.b * 1.5f);
+        Color dk  = new Color(r * 0.18f, g * 0.18f, b * 0.18f, 0.90f);
+        Color brt = new Color(r * 0.35f, g * 0.35f, b * 0.35f, 0.70f);
+        Color glw = new Color(r * 0.22f, g * 0.22f, b * 0.22f, 0.50f);
+
+        AddImg(MkRect("CT",  art, 0.38f, 0.10f, 0.62f, 0.88f), dk);
+        AddImg(MkRect("CTT", art, 0.43f, 0.80f, 0.57f, 0.98f), brt);
+        AddImg(MkRect("LT",  art, 0.18f, 0.18f, 0.38f, 0.72f), new Color(dk.r * 0.8f, dk.g * 0.8f, dk.b * 0.8f, 0.85f));
+        AddImg(MkRect("RT",  art, 0.62f, 0.18f, 0.82f, 0.72f), new Color(dk.r * 0.8f, dk.g * 0.8f, dk.b * 0.8f, 0.85f));
+        AddImg(MkRect("GL",  art, 0.28f, 0f, 0.72f, 0.28f), glw);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    //  SELECTION & DETAIL PANEL HANDLING
+    // ─────────────────────────────────────────────────────────────────────────
+    void SelectBuilding(string fid)
+    {
+        if (!string.IsNullOrEmpty(_selId))
         {
-            string[] row = rowLayout[r];
-            int cols = row.Length;
-            float rowTop = startY - r * rowH;
-
-            for (int c = 0; c < cols; c++)
+            var old = _bldCards.Find(c => c.FacilityId == _selId);
+            old?.SetSelected(false, _fac?.CanUpgrade(_selId) ?? false);
+        }
+        _selId = fid;
+        
+        foreach (var card in _bldCards)
+        {
+            if (card.Root != null)
             {
-                string fid = row[c];
-                FacilityDefinition def = defs.Find(d => d != null && d.FacilityId == fid);
-                if (def == null) continue;
+                card.Root.transform.localScale = (card.FacilityId == fid) ? Vector3.one : (Vector3.one * 0.95f);
+            }
+        }
 
-                int level = _facilityService.GetFacilityLevel(fid);
-                bool locked = level <= 0;
+        var sel = _bldCards.Find(c => c.FacilityId == fid);
+        sel?.SetSelected(true, false);
+        
+        // Dynamic subtle pulse glow on paths connected to the currently selected card
+        foreach (var p in _paths)
+        {
+            if (p.Img == null) continue;
+            if (p.FromId == fid || p.ToId == fid)
+            {
+                p.Img.color = C_TealActive;
+                if (p.PulseCoroutine != null) StopCoroutine(p.PulseCoroutine);
+                p.PulseCoroutine = StartCoroutine(PulseActivePath(p.Img));
+            }
+            else
+            {
+                if (p.PulseCoroutine != null) StopCoroutine(p.PulseCoroutine);
+                p.Img.color = p.IsActive ? C_TealActive : C_GrayDk;
+            }
+        }
 
-                FacilityCardWidget widget = BuildFacilityCard(contentRt, def, level, locked, c, cols, rowTop);
-                _cards.Add(widget);
+        RefreshDetail(fid);
+        SetDetailVisible(true);
+    }
+
+    IEnumerator PulseActivePath(Image img)
+    {
+        while (img != null)
+        {
+            float pingPong = Mathf.PingPong(Time.time * 2f, 1f);
+            img.color = Color.Lerp(C_TealActive * 0.7f, C_TealActive * 1.3f, pingPong);
+            yield return null;
+        }
+    }
+
+    void RefreshDetail(string fid)
+    {
+        if (_fac == null) return;
+        var def = _fac.GetFacility(fid);
+        if (def == null) return;
+
+        int level   = _fac.GetFacilityLevel(fid);
+        bool atMax  = level >= def.MaxLevel;
+        bool canUpg = _fac.CanUpgrade(fid);
+        var cost    = _fac.GetUpgradeCost(fid);
+
+        if (_dName  != null) _dName.text  = fid == "workshop" ? "COMMAND CENTER" : def.DisplayName.ToUpperInvariant();
+        if (_dLevel != null) _dLevel.text = atMax
+            ? "Lv. " + level + "  [MAX REGISTRATION]"
+            : "Lv. " + level + " -> Lv. " + (level + 1);
+        if (_dDesc  != null) { _dDesc.text  = _fac.GetFacilityEmotion(fid); _dDesc.color = C_Sub; }
+        
+        if (_dCurBonusValue != null) _dCurBonusValue.text = def.GetBenefitDescription(level);
+        if (_dNxtBonusValue != null)
+        {
+            _dNxtBonusValue.text = "<color=#2EA869>" + def.GetNextLevelBenefitDescription(level) + "</color>";
+        }
+
+        if (_dCostTxt  != null) _dCostTxt.text  = atMax
+            ? "Fortress expansion complete."
+            : "REQUIREMENT: " + cost.Gold.ToString("N0") + " Gold"
+              + (cost.Gems > 0 ? " + " + cost.Gems + " Gems" : "");
+
+        if (_dPower != null)
+        {
+            int powerRating = level * 350 + (fid == "workshop" ? 500 : 150);
+            _dPower.text = powerRating + " PWR (" + (canUpg ? "+" + 350 : "MAX") + ")";
+        }
+
+        if (_dUnlocks != null)
+        {
+            _dUnlocks.text = atMax 
+                ? "All systems functional."
+                : "Lv. " + (level + 1) + " Unlocks: Advanced " + def.DisplayName + " tier";
+        }
+
+        if (_detArtBg != null)
+            _detArtBg.color = new Color(
+                def.FacilityColor.r * 0.12f,
+                def.FacilityColor.g * 0.12f,
+                def.FacilityColor.b * 0.12f, 1f);
+
+        if (_btnUpg != null)
+        {
+            _btnUpg.interactable = canUpg;
+            var bi = _btnUpg.GetComponent<Image>();
+            
+            if (_upgBtnPulse != null) StopCoroutine(_upgBtnPulse);
+            
+            if (canUpg)
+            {
+                _btnUpgTxt.text = "EXECUTE UPGRADE";
+                _btnUpgTxt.color = Hex("#0a0a0a");
+                _btnUpgErr.text = ""; 
+                if (bi != null) bi.color = C_UpgBtn; // Flat Gold #c9a227
+            }
+            else
+            {
+                _btnUpgTxt.text = atMax ? "MAX EXPANSION" : "EXECUTE UPGRADE";
+                _btnUpgTxt.color = Hex("#666666");
+                if (bi != null) bi.color = new Color(0.15f, 0.15f, 0.15f, 1.0f);
+                _btnUpgErr.text = atMax ? "" : "INSUFFICIENT FUNDS";
             }
         }
     }
 
-    private FacilityCardWidget BuildFacilityCard(RectTransform parent, FacilityDefinition def,
-        int level, bool locked, int col, int totalCols, float rowTop)
+    string GetCitadelLore(string fid)
     {
-        GameObject cardGo = NewGO("Card_" + def.FacilityId, parent);
-        RectTransform cardRt = cardGo.GetComponent<RectTransform>();
-
-        // position: anchor top-left of parent, offset by column
-        cardRt.anchorMin = new Vector2(0.5f, 1);
-        cardRt.anchorMax = new Vector2(0.5f, 1);
-        cardRt.pivot     = new Vector2(0.5f, 1);
-
-        // x: spread columns horizontally with padding
-        float totalW  = totalCols * CardW + (totalCols - 1) * CardPad;
-        float startX  = -totalW / 2f + CardW / 2f;
-        float xPos    = startX + col * (CardW + CardPad);
-        cardRt.sizeDelta        = new Vector2(CardW, CardH);
-        cardRt.anchoredPosition = new Vector2(xPos, rowTop);
-
-        // card background
-        Color baseCol = locked ? ColLocked : new Color(def.FacilityColor.r * 0.18f, def.FacilityColor.g * 0.18f, def.FacilityColor.b * 0.18f, 1f);
-        Image cardImg = cardGo.AddComponent<Image>();
-        cardImg.color = baseCol;
-
-        // border Image child (for selection highlight)
-        GameObject borderGo = NewGO("Border", cardRt);
-        RectTransform borderRt = borderGo.GetComponent<RectTransform>();
-        Stretch(borderRt);
-        borderRt.offsetMin = new Vector2(-3, -3);
-        borderRt.offsetMax = new Vector2(3, 3);
-        Image borderImg = borderGo.AddComponent<Image>();
-        borderImg.color = ColCardBorder;
-        borderGo.transform.SetSiblingIndex(0); // draw behind content
-
-        // top accent bar using facility colour
-        GameObject accentGo = NewGO("Accent", cardRt);
-        RectTransform accentRt = accentGo.GetComponent<RectTransform>();
-        accentRt.anchorMin = new Vector2(0, 1);
-        accentRt.anchorMax = new Vector2(1, 1);
-        accentRt.pivot     = new Vector2(0.5f, 1);
-        accentRt.offsetMin = Vector2.zero;
-        accentRt.offsetMax = Vector2.zero;
-        accentRt.sizeDelta = new Vector2(0, 4);
-        AddImage(accentRt, locked ? ColLockedText : def.FacilityColor);
-
-        if (!locked)
+        switch (fid)
         {
-            // facility name
-            TextMeshProUGUI nameLabel = MakeLabel("N", cardRt, 17, FontStyles.Bold,
-                ColText, TextAlignmentOptions.Center);
-            nameLabel.rectTransform.anchorMin = new Vector2(0, 0.60f);
-            nameLabel.rectTransform.anchorMax = new Vector2(1, 0.92f);
-            nameLabel.rectTransform.offsetMin = new Vector2(6, 0);
-            nameLabel.rectTransform.offsetMax = new Vector2(-6, 0);
-            nameLabel.text = def.DisplayName.ToUpperInvariant();
-
-            // role badge
-            TextMeshProUGUI roleLabel = MakeLabel("R", cardRt, 12, FontStyles.Normal,
-                new Color(def.FacilityColor.r * 1.4f, def.FacilityColor.g * 1.4f, def.FacilityColor.b * 1.4f, 1f),
-                TextAlignmentOptions.Center);
-            roleLabel.rectTransform.anchorMin = new Vector2(0, 0.42f);
-            roleLabel.rectTransform.anchorMax = new Vector2(1, 0.60f);
-            roleLabel.rectTransform.offsetMin = new Vector2(6, 0);
-            roleLabel.rectTransform.offsetMax = new Vector2(-6, 0);
-            roleLabel.text = _facilityService.GetFacilityRole(def.FacilityId);
-
-            // level indicator bar bg
-            GameObject lvBgGo = NewGO("LvBg", cardRt);
-            RectTransform lvBgRt = lvBgGo.GetComponent<RectTransform>();
-            lvBgRt.anchorMin = new Vector2(0.05f, 0.22f);
-            lvBgRt.anchorMax = new Vector2(0.95f, 0.28f);
-            lvBgRt.offsetMin = lvBgRt.offsetMax = Vector2.zero;
-            AddImage(lvBgRt, Hex("#1A1E2E"));
-
-            // level fill
-            GameObject lvFillGo = NewGO("LvFill", lvBgGo.transform);
-            RectTransform lvFillRt = lvFillGo.GetComponent<RectTransform>();
-            lvFillRt.anchorMin = new Vector2(0, 0);
-            lvFillRt.anchorMax = new Vector2(Mathf.Clamp01((float)level / 10f), 1);
-            lvFillRt.offsetMin = lvFillRt.offsetMax = Vector2.zero;
-            Image fillImg = lvFillGo.AddComponent<Image>();
-            fillImg.color = def.FacilityColor;
-
-            // level text
-            TextMeshProUGUI lvLabel = MakeLabel("L", cardRt, 14, FontStyles.Normal,
-                ColGold, TextAlignmentOptions.Center);
-            lvLabel.rectTransform.anchorMin = new Vector2(0, 0.04f);
-            lvLabel.rectTransform.anchorMax = new Vector2(1, 0.20f);
-            lvLabel.rectTransform.offsetMin = Vector2.zero;
-            lvLabel.rectTransform.offsetMax = Vector2.zero;
-            lvLabel.text = "Lv. " + level;
+            case "workshop":
+                return "The core engine powering the floating base's internal grid. Contains synthesizers and heavy forge tools.";
+            case "memorial_hall":
+                return "A quiet shrine displaying echoes of ancient legends. Tracks the achievements of your summoned roster.";
+            case "crucible":
+                return "A glowing laboratory dedicated to synthesizing raw power and combining hero essences.";
+            case "tactical_station":
+                return "The operational bridge. Deciphers enemy patrol routes and tracks fortress threat level indices.";
+            case "dorms":
+                return "Sleeping quarters constructed to shield weary warriors from dimensional radiation.";
+            case "training_hall":
+                return "Equipped with automated dummy simulators. Accelerates basic combat drills for novices.";
+            case "square":
+                return "A temporal dimensional portal connecting the fortress to spatial rifts and anomalies.";
+            case "flying_dock":
+                return "The harbor for airships departing to outer world expeditions and raiding campaigns.";
+            default:
+                return "A dark stone monolith built from ruins recovered during early floor clear expeditions.";
         }
-        else
-        {
-            // locked overlay
-            TextMeshProUGUI lockedLabel = MakeLabel("Locked", cardRt, 16, FontStyles.Bold,
-                ColLockedText, TextAlignmentOptions.Center);
-            Stretch(lockedLabel.rectTransform);
-            lockedLabel.text = def.DisplayName.ToUpperInvariant() + "\n[LOCKED]";
-        }
-
-        // button component
-        Button btn = cardGo.AddComponent<Button>();
-        btn.targetGraphic = cardImg;
-        ColorBlock cb = btn.colors;
-        cb.normalColor      = Color.white;
-        cb.highlightedColor = locked ? Color.white : new Color(1.15f, 1.10f, 1.05f);
-        cb.pressedColor     = new Color(0.88f, 0.88f, 0.88f);
-        btn.colors = cb;
-
-        string capturedId = def.FacilityId;
-        if (!locked)
-        {
-            btn.onClick.AddListener(() => SelectFacility(capturedId));
-        }
-
-        return new FacilityCardWidget
-        {
-            Root       = cardGo,
-            BorderImg  = borderImg,
-            FacilityId = def.FacilityId,
-            Locked     = locked
-        };
     }
 
-    // ── Selection ─────────────────────────────────────────────────────────────
-    private void SelectFacility(string facilityId)
+    void SetDetailVisible(bool visible)
     {
-        // deselect old
-        if (!string.IsNullOrEmpty(_selectedId))
+        if (_detRoot == null) return;
+        foreach (Transform ch in _detRoot)
         {
-            FacilityCardWidget old = _cards.Find(c => c.FacilityId == _selectedId);
-            old?.SetSelected(false);
+            if (ch.name == "DetailContent")    ch.gameObject.SetActive(visible);
+            if (ch.name == "DetailPlaceholder") ch.gameObject.SetActive(!visible);
+            if (ch.name == "ArtArea")          ch.gameObject.SetActive(visible);
         }
-
-        _selectedId = facilityId;
-
-        // highlight new
-        FacilityCardWidget widget = _cards.Find(c => c.FacilityId == facilityId);
-        widget?.SetSelected(true);
-
-        RefreshDetailPanel(facilityId);
-        SetDetailVisible(true);
     }
 
-    private void RefreshDetailPanel(string facilityId)
+    void OnUpgradePressed()
     {
-        if (_facilityService == null) return;
-
-        FacilityDefinition def = _facilityService.GetFacility(facilityId);
-        if (def == null) return;
-
-        int level      = _facilityService.GetFacilityLevel(facilityId);
-        bool atMax     = level >= def.MaxLevel;
-        UpgradeCost cost = _facilityService.GetUpgradeCost(facilityId);
-        bool canUpgrade  = _facilityService.CanUpgrade(facilityId);
-
-        if (_detailName  != null) _detailName.text  = def.DisplayName.ToUpperInvariant();
-        if (_detailRole  != null) _detailRole.text  = _facilityService.GetFacilityRole(facilityId)
-                                                       + " | " + (def.FacilityType == FacilityType.Crucible
-                                                       || def.FacilityType == FacilityType.MemorialHall
-                                                       || def.FacilityType == FacilityType.TacticalStation
-                                                       ? "SHADOW" : "COMMAND");
-        if (_detailEmotion != null) _detailEmotion.text = _facilityService.GetFacilityEmotion(facilityId);
-        if (_detailLevel   != null) _detailLevel.text   = "Level  " + level + " / " + def.MaxLevel;
-
-        if (_levelBarFill != null)
-        {
-            RectTransform fillRt = _levelBarFill.rectTransform;
-            fillRt.anchorMax = new Vector2(Mathf.Clamp01((float)level / def.MaxLevel), 1);
-        }
-
-        if (_detailBenefit     != null) _detailBenefit.text     = "Now:  " + def.GetBenefitDescription(level);
-        if (_detailNextBenefit != null) _detailNextBenefit.text = atMax ? "MAX LEVEL" : "Next: " + def.GetNextLevelBenefitDescription(level);
-
-        if (_detailCost != null)
-        {
-            if (atMax)
-                _detailCost.text = "Fully upgraded";
-            else
-                _detailCost.text = "Cost: " + cost.Gold.ToString("N0") + " Gold"
-                                   + (cost.Gems > 0 ? " + " + cost.Gems.ToString("N0") + " Gems" : "");
-        }
-
-        if (_detailWarning != null)
-        {
-            _detailWarning.text = _facilityService.IsShadowFacility(facilityId)
-                ? "Shadow facilities change the roster permanently. Use with intent."
-                : "Command facilities support daily growth and long-term stability.";
-            _detailWarning.color = _facilityService.IsShadowFacility(facilityId) ? Hex("#C05050") : ColSubText;
-        }
-
-        if (_upgradeButton != null)
-        {
-            _upgradeButton.interactable = canUpgrade;
-            if (_upgradeBtnText != null)
-                _upgradeBtnText.text = atMax ? "MAX LEVEL" : (canUpgrade ? "UPGRADE" : "INSUFFICIENT FUNDS");
-
-            Image upgImg = _upgradeButton.GetComponent<Image>();
-            if (upgImg != null)
-                upgImg.color = canUpgrade ? ColUpgrade : ColCardBorder;
-        }
-
-        // dock panel
-        bool isDock = def.FacilityType == FacilityType.FlyingDock;
-        if (_dockSubPanel != null) _dockSubPanel.SetActive(isDock);
-        if (isDock) RefreshDockPanel();
-    }
-
-    private void SetDetailVisible(bool visible)
-    {
-        _detailVisible = visible;
-        if (_detailPanel == null) return;
-
-        // find content/placeholder by name in children
-        Transform content     = _detailPanel.Find("DetailContent");
-        Transform placeholder = _detailPanel.Find("DetailPlaceholder");
-        if (content     != null) content.gameObject.SetActive(visible);
-        if (placeholder != null) placeholder.gameObject.SetActive(!visible);
-    }
-
-    // ── Upgrade ───────────────────────────────────────────────────────────────
-    private void OnUpgradePressed()
-    {
-        if (string.IsNullOrEmpty(_selectedId)) return;
-        if (_facilityService == null) return;
-
-        bool ok = _facilityService.StartUpgrade(_selectedId);
+        if (string.IsNullOrEmpty(_selId) || _fac == null) return;
+        bool ok = _fac.StartUpgrade(_selId);
         if (ok)
         {
             RefreshHeader();
-            RefreshDetailPanel(_selectedId);
-            // rebuild the card's level bar
-            PopulateMap();
-            // re-select so highlight is restored
-            FacilityCardWidget w = _cards.Find(c => c.FacilityId == _selectedId);
-            w?.SetSelected(true);
+            RefreshMoraleBar();
+            RefreshDetail(_selId);
+            PopulateCitadelMap();
+            var card = _bldCards.Find(c => c.FacilityId == _selId);
+            card?.SetSelected(true, false);
+            SetDetailVisible(true);
         }
-        else if (_detailWarning != null)
+        else if (_btnUpgErr != null)
         {
-            _detailWarning.text  = "Upgrade failed — check your resources.";
-            _detailWarning.color = ColMoraleLow;
+            _btnUpgErr.text = "INSUFFICIENT FUNDS";
         }
     }
 
-    // ── Header refresh ────────────────────────────────────────────────────────
-    private void RefreshHeader()
+    void RefreshHeader()
     {
-        if (_currencyService == null) return;
-        if (_goldLabel   != null) _goldLabel.text   = _currencyService.GetGold().ToString("N0");
-        if (_gemsLabel   != null) _gemsLabel.text   = _currencyService.GetGems().ToString("N0");
-        if (_moraleLabel != null)
+        if (_cur == null) return;
+        if (_lblGold != null) _lblGold.text = _cur.GetGold().ToString("N0");
+        if (_lblGems != null) _lblGems.text = _cur.GetGems().ToString("N0");
+        if (_lblMor  != null)
         {
-            int morale = GetAverageMorale();
-            _moraleLabel.text  = morale.ToString();
-            _moraleLabel.color = morale < 30 ? ColMoraleLow : morale < 60 ? ColGold : ColMorale;
+            int m = GetAvgMorale();
+            _lblMor.text  = m.ToString() + " / 100";
+            _lblMor.color = m < 30 ? C_Red : m < 60 ? C_Gold : C_Green;
         }
     }
 
-    private int GetAverageMorale()
+    void RefreshMoraleBar()
     {
-        if (_rosterService == null) return 0;
-        List<HeroInstance> alive = _rosterService.GetAlive();
+        if (_morFill == null) return;
+        int morale = GetAvgMorale();
+        float t = Mathf.Clamp01(morale / 100f);
+        _morFill.rectTransform.anchorMax = new Vector2(t, 1f);
+        _morFill.color = Color.Lerp(C_Red, C_Green, t);
+        if (_morTxt != null) _morTxt.text = morale + " / 100";
+    }
+
+    int GetAvgMorale()
+    {
+        if (_ros == null) return 0;
+        var alive = _ros.GetAlive();
         if (alive == null || alive.Count == 0) return 0;
         return Mathf.RoundToInt((float)alive.Average(h => h.Morale));
     }
 
-    // ── Dock helpers ──────────────────────────────────────────────────────────
-    private void RefreshDockPanel()
+    void StartPulse(FacilityBuildingCard card)
     {
-        if (_dockSubPanel == null || _facilityService == null) return;
-        DockSortieType queued = _facilityService.GetQueuedSortieType();
-        if (_dockStatus != null) _dockStatus.text = "Queued: " + queued.ToString().ToUpperInvariant();
-        SetSortieButtonState(_btnRecon,      DockSortieType.Recon,      queued);
-        SetSortieButtonState(_btnSupply,     DockSortieType.Supply,     queued);
-        SetSortieButtonState(_btnExtraction, DockSortieType.Extraction, queued);
+        if (card?.GlowImg == null) return;
+        if (_pulses.TryGetValue(card.FacilityId, out var old) && old != null) StopCoroutine(old);
+        _pulses[card.FacilityId] = StartCoroutine(PulseGlow(card.GlowImg, C_Green, 0.20f, 0.80f, 0.8f));
     }
 
-    private void SetSortieButtonState(Button btn, DockSortieType type, DockSortieType queued)
+    IEnumerator PulseGlow(Image img, Color col, float minA, float maxA, float speed)
     {
-        if (btn == null) return;
-        bool active = queued == type;
-        Image img = btn.GetComponent<Image>();
-        if (img != null) img.color = active ? ColUpgrade : ColCardBorder;
-        TextMeshProUGUI lbl = btn.GetComponentInChildren<TextMeshProUGUI>();
-        if (lbl != null) lbl.color = active ? ColUpgradeHi : ColText;
-    }
-
-    private void LaunchSortie()
-    {
-        if (_facilityService == null) return;
-        if (_facilityService.LaunchSortie(out DockSortieResult result))
+        float t = 0f;
+        while (img != null)
         {
-            if (_detailWarning != null) { _detailWarning.text = result.Summary; _detailWarning.color = ColMorale; }
-            RefreshHeader();
-            RefreshDockPanel();
-        }
-        else if (_detailWarning != null)
-        {
-            _detailWarning.text  = result.Summary;
-            _detailWarning.color = ColMoraleLow;
+            float alpha = Mathf.Lerp(minA, maxA, (Mathf.Sin(t * speed * Mathf.PI * 2f) + 1f) * 0.5f);
+            img.color = new Color(col.r, col.g, col.b, alpha);
+            t += Time.deltaTime;
+            yield return null;
         }
     }
 
-    // ── Low-level helpers ─────────────────────────────────────────────────────
-    private static GameObject NewGO(string name, RectTransform parent)
+    IEnumerator SpawnParticles(RectTransform mapRoot)
+    {
+        float[]  xs   = { 0.10f, 0.22f, 0.38f, 0.50f, 0.62f, 0.78f, 0.90f };
+        Color[]  cols = {
+            new Color(C_Gold.r,  C_Gold.g,  C_Gold.b,  0.22f),
+            new Color(0.28f, 0.45f, 0.85f, 0.20f),
+            new Color(C_Green.r, C_Green.g, C_Green.b, 0.18f)
+        };
+        int idx = 0;
+
+        while (mapRoot != null)
+        {
+            yield return new WaitForSeconds(1.10f);
+            if (mapRoot == null) yield break;
+
+            var pGo = new GameObject("P", typeof(RectTransform), typeof(Image));
+            pGo.transform.SetParent(mapRoot, false);
+            var pRt = pGo.GetComponent<RectTransform>();
+            float xFrac = xs[Random.Range(0, xs.Length)];
+            pRt.anchorMin = new Vector2(xFrac, 0);
+            pRt.anchorMax = new Vector2(xFrac, 0);
+            pRt.pivot     = new Vector2(0.5f, 0.5f);
+            float sz = Random.Range(4f, 8f);
+            pRt.sizeDelta        = new Vector2(sz, sz);
+            pRt.anchoredPosition = new Vector2(0, Random.Range(20f, 600f));
+            pGo.GetComponent<Image>().color = cols[idx % cols.Length];
+            idx++;
+
+            StartCoroutine(FloatParticle(pGo, pRt, pGo.GetComponent<Image>()));
+        }
+    }
+
+    IEnumerator FloatParticle(GameObject go, RectTransform rt, Image img)
+    {
+        float dur     = Random.Range(4f, 7f);
+        float elapsed = 0f;
+        float startY  = rt != null ? rt.anchoredPosition.y : 0f;
+        float rise    = Random.Range(100f, 250f);
+        Color startC  = img != null ? img.color : Color.clear;
+
+        while (elapsed < dur && go != null)
+        {
+            elapsed += Time.deltaTime;
+            float t = elapsed / dur;
+            if (rt  != null) rt.anchoredPosition = new Vector2(rt.anchoredPosition.x, startY + t * rise);
+            if (img != null) img.color           = new Color(startC.r, startC.g, startC.b, startC.a * (1f - t));
+            yield return null;
+        }
+        if (go != null) Destroy(go);
+    }
+
+    // ── Helpers ──────────────────────────────────────────────────────────────
+    static GameObject NewGO(string name, RectTransform parent)
     {
         var go = new GameObject(name, typeof(RectTransform));
         go.transform.SetParent(parent, false);
         return go;
     }
-
-    private static GameObject NewGO(string name, Transform parent)
+    static GameObject NewGO(string name, Transform parent)
     {
         var go = new GameObject(name, typeof(RectTransform));
         go.transform.SetParent(parent, false);
         return go;
     }
-
-    private static RectTransform GetOrAddRectTransform(GameObject go)
+    static RectTransform MkRect(string name, RectTransform parent, float x0, float y0, float x1, float y1)
     {
-        return go.GetComponent<RectTransform>() ?? go.AddComponent<RectTransform>();
-    }
-
-    private static void Stretch(RectTransform rt)
-    {
-        rt.anchorMin = Vector2.zero;
-        rt.anchorMax = Vector2.one;
-        rt.offsetMin = Vector2.zero;
-        rt.offsetMax = Vector2.zero;
-    }
-
-    private static Image AddImage(RectTransform rt, Color col)
-    {
-        Image img = rt.gameObject.GetComponent<Image>() ?? rt.gameObject.AddComponent<Image>();
-        img.color = col;
-        return img;
-    }
-
-    private static Button MakeButton(string name, string label, float fontSize, RectTransform parent,
-        Vector2 anchorMin, Vector2 anchorMax, Vector2 pivot)
-    {
-        GameObject go = new GameObject(name, typeof(RectTransform), typeof(Image), typeof(Button));
+        var go = new GameObject(name, typeof(RectTransform));
         go.transform.SetParent(parent, false);
-        RectTransform rt = go.GetComponent<RectTransform>();
-        rt.anchorMin = anchorMin;
-        rt.anchorMax = anchorMax;
-        rt.pivot     = pivot;
+        var rt = go.GetComponent<RectTransform>();
+        rt.anchorMin = new Vector2(x0, y0); rt.anchorMax = new Vector2(x1, y1);
         rt.offsetMin = rt.offsetMax = Vector2.zero;
-        Button btn = go.GetComponent<Button>();
-        TextMeshProUGUI txt = new GameObject("BtnText", typeof(RectTransform), typeof(TextMeshProUGUI))
-                              .GetComponent<TextMeshProUGUI>();
-        txt.transform.SetParent(go.transform, false);
-        Stretch(txt.rectTransform);
-        txt.text      = label;
-        txt.fontSize  = fontSize;
-        txt.alignment = TextAlignmentOptions.Center;
-        txt.color     = Color.white;
-        return btn;
+        return rt;
     }
-
-    private static void StyleButton(Button btn, Color bgCol, Color textCol)
+    static T GetOrAdd<T>(GameObject go) where T : Component => go.GetComponent<T>() ?? go.AddComponent<T>();
+    static Image AddImg(RectTransform rt, Color col)
     {
-        Image img = btn.GetComponent<Image>();
-        if (img != null) img.color = bgCol;
-        TextMeshProUGUI txt = btn.GetComponentInChildren<TextMeshProUGUI>();
-        if (txt != null) txt.color = textCol;
+        var img = rt.gameObject.GetComponent<Image>() ?? rt.gameObject.AddComponent<Image>();
+        img.color = col; return img;
     }
-
-    private static TextMeshProUGUI MakeLabel(string name, Transform parent, float size,
-        FontStyles style, Color col, TextAlignmentOptions align)
+    static void Stretch(RectTransform rt)
     {
-        GameObject go = new GameObject(name, typeof(RectTransform), typeof(TextMeshProUGUI));
+        rt.anchorMin = Vector2.zero; rt.anchorMax = Vector2.one;
+        rt.offsetMin = rt.offsetMax = Vector2.zero;
+    }
+    static TextMeshProUGUI MkLbl(string name, RectTransform parent, float sz, FontStyles style, Color col, TextAlignmentOptions align)
+    {
+        var go = new GameObject(name, typeof(RectTransform), typeof(TextMeshProUGUI));
         go.transform.SetParent(parent, false);
-        TextMeshProUGUI tmp = go.GetComponent<TextMeshProUGUI>();
-        tmp.fontSize  = size;
-        tmp.fontStyle = style;
-        tmp.color     = col;
-        tmp.alignment = align;
+        var tmp = go.GetComponent<TextMeshProUGUI>();
+        tmp.fontSize = sz; tmp.fontStyle = style; tmp.color = col; tmp.alignment = align;
         return tmp;
     }
-
-    // anchoredPosition-based label placement from top-left
-    private static void PositionLabel(RectTransform rt, float padLeft, float yFromTop, float padRight, float height)
+    static TextMeshProUGUI MkLbl(string name, Transform parent, float sz, FontStyles style, Color col, TextAlignmentOptions align)
     {
-        rt.anchorMin = new Vector2(0, 1);
-        rt.anchorMax = new Vector2(1, 1);
-        rt.pivot     = new Vector2(0, 1);
-        rt.offsetMin = new Vector2(padLeft,  0);
-        rt.offsetMax = new Vector2(padRight, 0);
-        rt.sizeDelta = new Vector2(0, height);
-        rt.anchoredPosition = new Vector2(padLeft, yFromTop);
-    }
-
-    private static void MakeDivider(Transform parent, float yFromTop)
-    {
-        GameObject go = new GameObject("Divider", typeof(RectTransform), typeof(Image));
+        var go = new GameObject(name, typeof(RectTransform), typeof(TextMeshProUGUI));
         go.transform.SetParent(parent, false);
-        RectTransform rt = go.GetComponent<RectTransform>();
-        rt.anchorMin = new Vector2(0.02f, 1);
-        rt.anchorMax = new Vector2(0.98f, 1);
-        rt.pivot     = new Vector2(0.5f, 1);
-        rt.sizeDelta = new Vector2(0, 1);
-        rt.anchoredPosition = new Vector2(0, yFromTop);
-        go.GetComponent<Image>().color = ColDivider;
+        var tmp = go.GetComponent<TextMeshProUGUI>();
+        tmp.fontSize = sz; tmp.fontStyle = style; tmp.color = col; tmp.alignment = align;
+        return tmp;
     }
-
-    private static Color Hex(string hex)
+    static TextMeshProUGUI PosLbl(string name, RectTransform parent, float sz, FontStyles style, Color col, TextAlignmentOptions align, float padL, float yFromTop, float padR, float h)
     {
-        ColorUtility.TryParseHtmlString(hex, out Color c);
-        return c;
+        var lbl = MkLbl(name, parent, sz, style, col, align);
+        var rt  = lbl.rectTransform;
+        rt.anchorMin = new Vector2(0, 1); rt.anchorMax = new Vector2(1, 1);
+        rt.pivot     = new Vector2(0, 1);
+        rt.offsetMin = new Vector2(padL, 0); rt.offsetMax = new Vector2(padR, 0);
+        rt.sizeDelta = new Vector2(0, h);
+        rt.anchoredPosition = new Vector2(padL, yFromTop);
+        return lbl;
     }
+    static void MkDivider(RectTransform parent, float yFromTop)
+    {
+        var go = new GameObject("Div", typeof(RectTransform), typeof(Image));
+        go.transform.SetParent(parent, false);
+        var rt = go.GetComponent<RectTransform>();
+        rt.anchorMin = new Vector2(0.03f, 1); rt.anchorMax = new Vector2(0.97f, 1);
+        rt.pivot = new Vector2(0.5f, 1); rt.sizeDelta = new Vector2(0, 1);
+        rt.anchoredPosition = new Vector2(0, yFromTop);
+        go.GetComponent<Image>().color = new Color(0.12f, 0.14f, 0.22f, 0.6f);
+    }
+    static Color Hex(string h) { ColorUtility.TryParseHtmlString(h, out Color c); return c; }
 }
 
-// ── Helper widget wrapper ─────────────────────────────────────────────────────
-public class FacilityCardWidget
+// ─────────────────────────────────────────────────────────────────────────────
+public class PathSegmentWidget
 {
-    public GameObject Root;
-    public Image      BorderImg;
-    public string     FacilityId;
-    public bool       Locked;
+    public string FromId;
+    public string ToId;
+    public Image Img;
+    public bool IsActive;
+    public Coroutine PulseCoroutine;
+}
 
-    public void SetSelected(bool selected)
+// ─────────────────────────────────────────────────────────────────────────────
+public class FacilityBuildingCard
+{
+    public string     FacilityId;
+    public GameObject Root;
+    public Image      GlowImg;
+    public Image      CardImg;
+    public bool       CanUpgrade;
+
+    public void SetSelected(bool selected, bool upgradeReady)
     {
-        if (BorderImg == null) return;
-        BorderImg.color = selected
-            ? new Color(0.784f, 0.659f, 0.294f, 1f)   // #C8A84B
-            : new Color(0.118f, 0.133f, 0.188f, 1f);  // #1E2240
+        if (GlowImg == null) return;
+        if (selected)
+            GlowImg.color = new Color(0.784f, 0.659f, 0.294f, 1.00f);  // gold glow
+        else if (upgradeReady)
+            GlowImg.color = new Color(0.227f, 0.722f, 0.478f, 0.55f);  // green
+        else
+            GlowImg.color = new Color(0.118f, 0.149f, 0.271f, 0.70f);  // dark border
     }
 }
