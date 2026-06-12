@@ -14,13 +14,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   HeroId: chloe
   HeroName: Chloe
-  BaseStarRank: 1
   BaseClass: 7
+  BaseStarRank: 1
+  HeroClass: 
   BaseHP: 12
   BaseATK: 14
   BaseDEF: 10
-  PortraitSpritePath: Portraits/chloe
+  BaseSPD: 0
+  PortraitSpritePath: HeroPortraits/chloe_portrait
   CardFrameSpritePath: frame_1
-  HeroClass: 
-  Portrait: {fileID: 0}
+  Portrait: {fileID: 8673657509814189001, guid: fb77225e46ec98f4ab5206790eb2d312, type: 3}
   LoreText: 

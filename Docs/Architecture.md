@@ -1,7 +1,7 @@
 # Architecture
 
 ## Overview
-Pick Me Up is a Unity 6 Android portrait 2D gacha RPG. The project uses a service-based architecture managed through `ServiceRegistry` with scenes loaded additively around a persistent boot scene.
+Pick Me Up is a Unity 6 Android landscape 2D gacha RPG. The project uses a service-based architecture managed through `ServiceRegistry` with scenes loaded additively around a persistent boot scene.
 
 ## Core Architecture
 
@@ -139,7 +139,7 @@ Procedural scene and asset generation tools under `Assets/Scripts/Editor/`:
 
 ## UI Rules
 
-- Portrait-only layouts (1080×2340).
+- Landscape-only layouts (2340×1080).
 - Mobile-first: touch input, safe area padding, responsive scaling.
 - Dark fantasy aesthetic.
 - Avoid hardcoded UI references — prefer procedural generation via Editor tools.
@@ -159,3 +159,4 @@ Assets/Resources          — Prefabs, sprites, heroes, dungeons, items, portrai
 Assets/Configs            — Runtime config assets (featured units)
 Assets/ScriptableObjects  — Class definitions (hero classes, player profile)
 ```
+`

@@ -4,7 +4,7 @@
 
 ### Objectives
 - Canonicalize hero names, role labels, and presentation text.
-- Remove roster ambiguity on small portrait screens.
+- Remove roster ambiguity on small landscape screens.
 - Make the Master perspective feel present in every core scene.
 
 ### Tasks
@@ -58,7 +58,7 @@
 
 ### Objectives
 - Make the game feel premium and deliberate.
-- Keep the experience portrait-first and thumb-friendly.
+- Keep the experience landscape-first and thumb-friendly.
 - Improve pacing, transitions, and scene hierarchy.
 
 ### Tasks

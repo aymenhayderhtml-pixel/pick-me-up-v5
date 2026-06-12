@@ -3,7 +3,7 @@
 ## Milestone 1: Readable Roster
 - Hero names are canonicalized and consistent.
 - Roster cards and detail panels share the same identity language.
-- Role labels are easy to read on small portrait screens.
+- Role labels are easy to read on small landscape screens.
 
 ## Milestone 2: Meaningful Memorial
 - Fallen heroes remain visible in the memorial layer.
@@ -21,7 +21,7 @@
 - Synthesis and upgrades create real spending pressure.
 
 ## Milestone 5: Premium Mobile Feel
-- All major screens are portrait-first and thumb-reachable.
+- All major screens are landscape-first and thumb-reachable.
 - Procedural UI feels polished, not placeholder.
 - Transitions and confirmations feel deliberate.
 

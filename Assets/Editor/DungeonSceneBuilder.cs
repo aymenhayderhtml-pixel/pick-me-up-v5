@@ -25,8 +25,8 @@ public class DungeonSceneBuilder
         canvas.renderMode = RenderMode.ScreenSpaceOverlay;
         CanvasScaler scaler = canvasObj.AddComponent<CanvasScaler>();
         scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-        scaler.referenceResolution = new Vector2(1080, 2340);
-        scaler.matchWidthOrHeight = 0.5f;
+        scaler.referenceResolution = new Vector2(2340, 1080);
+        scaler.matchWidthOrHeight = 1.0f;
         canvasObj.AddComponent<GraphicRaycaster>();
 
         // Background / stage bands
@@ -395,6 +395,76 @@ public class DungeonSceneBuilder
         }
 
         soSpawn.ApplyModifiedProperties();
+
+        // ---------------------------------------------------------------
+        // CombatBridge — sits on the SpawnManager object
+        // ---------------------------------------------------------------
+        CombatBridge combatBridge = managerObj.AddComponent<CombatBridge>();
+        SerializedObject soBridge = new SerializedObject(combatBridge);
+        soBridge.FindProperty("spawnRoot").objectReferenceValue = spawnRoot.transform;
+        soBridge.ApplyModifiedProperties();
+
+        // ---------------------------------------------------------------
+        // BattleHUD — hero bars + wave label + speed toggle
+        // ---------------------------------------------------------------
+        // Container panel at bottom of canvas (above bottom band)
+        GameObject battleHudPanel = new GameObject("BattleHUDPanel", typeof(RectTransform), typeof(Image));
+        battleHudPanel.transform.SetParent(canvasObj.transform, false);
+        battleHudPanel.GetComponent<Image>().color = new Color(0.05f, 0.06f, 0.09f, 0.88f);
+        RectTransform battleHudRt = battleHudPanel.GetComponent<RectTransform>();
+        battleHudRt.anchorMin = new Vector2(0f, 0.20f);
+        battleHudRt.anchorMax = new Vector2(1f, 0.36f);
+        battleHudRt.offsetMin = battleHudRt.offsetMax = Vector2.zero;
+
+        // Hero bars panel inside BattleHUD
+        GameObject heroBarsPanel = new GameObject("HeroBarsPanel", typeof(RectTransform), typeof(Image));
+        heroBarsPanel.transform.SetParent(battleHudPanel.transform, false);
+        heroBarsPanel.GetComponent<Image>().color = Color.clear;
+        RectTransform heroBarsRt = heroBarsPanel.GetComponent<RectTransform>();
+        heroBarsRt.anchorMin = new Vector2(0f, 0.30f);
+        heroBarsRt.anchorMax = new Vector2(1f, 1f);
+        heroBarsRt.offsetMin = heroBarsRt.offsetMax = Vector2.zero;
+
+        // Battle wave label (separate from DungeonHUD wave label – combat-specific)
+        GameObject battleWaveLabelObj = CreateTMP("BattleWaveLabel", "Wave — / —", 22f, battleHudPanel.transform);
+        SetAnchors(battleWaveLabelObj, new Vector2(0.02f, 0.05f), new Vector2(0.60f, 0.30f));
+        battleWaveLabelObj.GetComponent<TextMeshProUGUI>().alignment = TextAlignmentOptions.MidlineLeft;
+        battleWaveLabelObj.GetComponent<TextMeshProUGUI>().color = new Color(0.75f, 0.82f, 0.95f);
+
+        // Speed toggle button
+        GameObject speedBtnObj = CreateButton("SpeedToggleButton", "1x", battleHudPanel.transform,
+            new Color(0.22f, 0.26f, 0.36f), 20f);
+        SetAnchors(speedBtnObj, new Vector2(0.82f, 0.05f), new Vector2(0.98f, 0.28f));
+        TextMeshProUGUI speedLabel = speedBtnObj.GetComponentInChildren<TextMeshProUGUI>();
+
+        GameObject battleHudObj = new GameObject("BattleHUD");
+        battleHudObj.transform.SetParent(controllersObj.transform);
+        BattleHUD battleHud = battleHudObj.AddComponent<BattleHUD>();
+        SerializedObject soBattleHud = new SerializedObject(battleHud);
+        soBattleHud.FindProperty("heroBarsPanel").objectReferenceValue  = heroBarsRt;
+        soBattleHud.FindProperty("waveLabel").objectReferenceValue      = battleWaveLabelObj.GetComponent<TextMeshProUGUI>();
+        soBattleHud.FindProperty("speedToggleButton").objectReferenceValue = speedBtnObj.GetComponent<Button>();
+        soBattleHud.FindProperty("speedToggleLabel").objectReferenceValue  = speedLabel;
+        soBattleHud.ApplyModifiedProperties();
+
+        // ---------------------------------------------------------------
+        // FormationView — full-screen overlay, starts inactive
+        // ---------------------------------------------------------------
+        GameObject formationViewPanel = new GameObject("FormationView",
+            typeof(RectTransform), typeof(Image), typeof(FormationView));
+        formationViewPanel.transform.SetParent(canvasObj.transform, false);
+        formationViewPanel.GetComponent<Image>().color = new Color(0.06f, 0.07f, 0.10f, 0.97f);
+        RectTransform fvRt = formationViewPanel.GetComponent<RectTransform>();
+        fvRt.anchorMin = Vector2.zero;
+        fvRt.anchorMax = Vector2.one;
+        fvRt.offsetMin = fvRt.offsetMax = Vector2.zero;
+        formationViewPanel.SetActive(false);   // hidden until player taps Start
+
+        // Wire FormationView reference into DungeonListView so it can open it
+        SerializedObject soList2 = new SerializedObject(listView);
+        soList2.FindProperty("formationView").objectReferenceValue =
+            formationViewPanel.GetComponent<FormationView>();
+        soList2.ApplyModifiedProperties();
 
         // EventSystem
         GameObject eventSystem = new GameObject("EventSystem");

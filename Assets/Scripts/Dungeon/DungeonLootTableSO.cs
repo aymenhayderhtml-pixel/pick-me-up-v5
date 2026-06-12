@@ -36,9 +36,25 @@ public class DungeonLootTableSO : ScriptableObject
     [SerializeField, Min(0f)] private float bonusDropChance = 0f;
     [SerializeField] private List<LootEntry> entries = new List<LootEntry>();
 
+    [Header("Boss Loot")]
+    [SerializeField] private List<LootEntry> bossLoot = new List<LootEntry>();
+    [SerializeField, Min(0)] private int bossGoldBonus = 500;
+    [SerializeField, Min(0)] private int bossExpBonus = 250;
+
+    [Header("Rarity Weights")]
+    [SerializeField, Range(0f, 1f)] private float commonWeight = 0.6f;
+    [SerializeField, Range(0f, 1f)] private float rareWeight = 0.3f;
+    [SerializeField, Range(0f, 1f)] private float epicWeight = 0.1f;
+
     public int Rolls => Mathf.Max(0, rolls);
     public float BonusDropChance => Mathf.Clamp01(bonusDropChance);
     public IReadOnlyList<LootEntry> Entries => entries;
+    public IReadOnlyList<LootEntry> BossLoot => bossLoot;
+    public int BossGoldBonus => bossGoldBonus;
+    public int BossExpBonus => bossExpBonus;
+    public float CommonWeight => commonWeight;
+    public float RareWeight => rareWeight;
+    public float EpicWeight => epicWeight;
 }
 
 [System.Serializable]

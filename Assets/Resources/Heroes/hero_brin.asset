@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0ee598ede3ba0b041bc6ed788b4d3d9f, type: 3}
+  m_Name: hero_brin
+  m_EditorClassIdentifier: 
+  HeroId: hero_brin
+  HeroName: Brin
+  BaseClass: 4
+  BaseStarRank: 2
+  HeroClass: Tank
+  BaseHP: 520
+  BaseATK: 50
+  BaseDEF: 95
+  BaseSPD: 32
+  PortraitSpritePath: HeroPortraits/hero_brin_portrait
+  CardFrameSpritePath: 
+  Portrait: {fileID: 3844995374041232784, guid: c00251e5c0e5faa4984f1c1abb89f094, type: 3}
+  LoreText: Deep-dweller who surfaced once and found the surface world too bright,
+    too loud, too fragile.

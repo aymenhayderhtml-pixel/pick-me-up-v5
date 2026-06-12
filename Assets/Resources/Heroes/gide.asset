@@ -14,13 +14,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   HeroId: gide
   HeroName: Gide
-  BaseStarRank: 1
   BaseClass: 7
+  BaseStarRank: 1
+  HeroClass: 
   BaseHP: 12
   BaseATK: 14
   BaseDEF: 10
-  PortraitSpritePath: Portraits/gide
+  BaseSPD: 0
+  PortraitSpritePath: HeroPortraits/gide_portrait
   CardFrameSpritePath: frame_1
-  HeroClass: 
-  Portrait: {fileID: 0}
+  Portrait: {fileID: -3746447771778858895, guid: 96630554ac90ca447b6ef498bf1475f8, type: 3}
   LoreText: 

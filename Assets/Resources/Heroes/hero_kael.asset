@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0ee598ede3ba0b041bc6ed788b4d3d9f, type: 3}
+  m_Name: hero_kael
+  m_EditorClassIdentifier: 
+  HeroId: hero_kael
+  HeroName: Kael
+  BaseClass: 0
+  BaseStarRank: 3
+  HeroClass: Warrior
+  BaseHP: 340
+  BaseATK: 85
+  BaseDEF: 45
+  BaseSPD: 50
+  PortraitSpritePath: HeroPortraits/hero_kael_portrait
+  CardFrameSpritePath: 
+  Portrait: {fileID: -2051144051059407288, guid: 101dc6a2fee2e5c40bf35a555b1e30b4, type: 3}
+  LoreText: A disgraced knight who still carries the flame of his fallen order. His
+    blade burns with vengeance.

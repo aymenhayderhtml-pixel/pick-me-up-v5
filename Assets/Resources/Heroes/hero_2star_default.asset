@@ -14,13 +14,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   HeroId: hero_2star_default
   HeroName: Trainee
-  BaseStarRank: 2
   BaseClass: 0
+  BaseStarRank: 2
+  HeroClass: Fighter
   BaseHP: 80
   BaseATK: 12
   BaseDEF: 8
-  PortraitSpritePath: Portraits/hero_2star_default
+  BaseSPD: 0
+  PortraitSpritePath: HeroPortraits/hero_2star_default_portrait
   CardFrameSpritePath: 
-  HeroClass: Fighter
-  Portrait: {fileID: 0}
+  Portrait: {fileID: 3704301459331940235, guid: 16dd4d1460974b44b96385d66e85db63, type: 3}
   LoreText: A fresh recruit from the summoning pool. Unremarkable but determined.

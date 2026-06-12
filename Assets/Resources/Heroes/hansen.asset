@@ -14,13 +14,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   HeroId: hansen
   HeroName: Hansen
-  BaseStarRank: 1
   BaseClass: 7
+  BaseStarRank: 1
+  HeroClass: 
   BaseHP: 12
   BaseATK: 14
   BaseDEF: 10
-  PortraitSpritePath: Portraits/hansen
+  BaseSPD: 0
+  PortraitSpritePath: HeroPortraits/hansen_portrait
   CardFrameSpritePath: frame_1
-  HeroClass: 
-  Portrait: {fileID: 0}
+  Portrait: {fileID: 6936797492796549891, guid: b80df2174322f994592303f6421564b2, type: 3}
   LoreText: 

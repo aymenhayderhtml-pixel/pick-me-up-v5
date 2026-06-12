@@ -14,13 +14,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   HeroId: kishasha
   HeroName: Kishasha
-  BaseStarRank: 4
   BaseClass: 3
+  BaseStarRank: 4
+  HeroClass: 
   BaseHP: 4000
   BaseATK: 400
   BaseDEF: 200
-  PortraitSpritePath: Portraits/kishasha
+  BaseSPD: 0
+  PortraitSpritePath: HeroPortraits/kishasha_portrait
   CardFrameSpritePath: frame_4
-  HeroClass: 
-  Portrait: {fileID: 0}
+  Portrait: {fileID: -8313311908751720130, guid: 6a01e9d03e2188248bf08badeedc6d48, type: 3}
   LoreText: 

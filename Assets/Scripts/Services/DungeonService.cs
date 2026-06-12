@@ -58,6 +58,15 @@ public class DungeonService : IDungeonService
             return;
         }
 
+        // Stamina cost
+        int staminaCost = GetStaminaCost(dungeonData);
+        if (_gameState.Data.Stamina < staminaCost)
+        {
+            Debug.LogWarning("[DungeonService] Not enough stamina. Need " + staminaCost);
+            return;
+        }
+        _gameState.Data.Stamina -= staminaCost;
+
         _activeDungeonData = dungeonData;
         CurrentRunState.Initialize(dungeonData.Id, dungeonData.TotalWaves);
         OnDungeonStarted?.Invoke(dungeonData);
@@ -149,6 +158,19 @@ public class DungeonService : IDungeonService
             _rewardService.ApplyReward(result);
             OnRewardGranted?.Invoke(result);
         }
+    }
+
+    private int GetStaminaCost(DungeonDataSO dungeonData)
+    {
+        if (dungeonData == null) return 10;
+        int cost = dungeonData.StaminaCost > 0 ? dungeonData.StaminaCost : 10;
+        IFacilityService facilityService = ServiceRegistry.Instance?.Resolve<IFacilityService>();
+        if (facilityService != null)
+        {
+            int dormsLevel = facilityService.GetFacilityLevel("dorms");
+            cost = Mathf.Max(1, cost - dormsLevel);
+        }
+        return cost;
     }
 
     private List<DungeonDataSO> LoadDungeons()

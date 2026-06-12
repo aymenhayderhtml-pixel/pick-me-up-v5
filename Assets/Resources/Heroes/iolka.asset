@@ -14,13 +14,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   HeroId: iolka
   HeroName: Iolka
-  BaseStarRank: 4
   BaseClass: 2
+  BaseStarRank: 4
+  HeroClass: 
   BaseHP: 4000
   BaseATK: 400
   BaseDEF: 200
-  PortraitSpritePath: Portraits/iolka
+  BaseSPD: 0
+  PortraitSpritePath: HeroPortraits/iolka_portrait
   CardFrameSpritePath: frame_4
-  HeroClass: 
-  Portrait: {fileID: 0}
+  Portrait: {fileID: 2468932564506931679, guid: ba88d7def9fac0f499a6725bb64c0e84, type: 3}
   LoreText: 

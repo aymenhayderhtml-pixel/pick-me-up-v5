@@ -1,5 +1,5 @@
 # Pick Me Up - Infinite Gacha
-## Unity 6 | Android Portrait 1080x2340 | Samsung Galaxy A34
+## Unity 6 | Android Landscape 2340x1080 | Samsung Galaxy A34
 
 ---
 
@@ -155,7 +155,7 @@ Use this if you want an external model to help with research without burning man
 You are helping design a Unity 6 mobile gacha RPG inspired by Pick Me Up Infinite Gacha.
 I need concise research notes, not long explanations.
 Focus only on:
-1. Mobile gacha RPG UI/UX patterns for portrait Android games
+1. Mobile gacha RPG UI/UX patterns for landscape Android games
 2. Data-driven daily dungeon scheduling systems
 3. Facility/passive progression systems in gacha management games
 4. Hero collection / memorial hall / codex UX patterns

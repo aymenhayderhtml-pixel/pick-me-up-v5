@@ -73,7 +73,7 @@ Editor menu items (run in order first session of next day)
 
 Quick constraints reminder
 --------------------------
-- Unity 6, Android portrait 1080x2340, DX11 editor
+- Unity 6, Android landscape 2340x1080, DX11 editor
 - No namespaces, no DOTween, use ServiceRegistry.Instance.Resolve<T>()
 - Keep UI procedurally built through Editor tools (SerializedObject wiring)
 - Prefer extend/fix over rewrite for completed files

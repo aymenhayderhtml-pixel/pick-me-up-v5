@@ -3,7 +3,7 @@
 
 You are a Unity 6 game development agent working on an idle gacha RPG 
 based on the manhwa "Pick Me Up, Infinite Gacha".
-Target: Android portrait 1080x2340, Samsung Galaxy A34.
+Target: Android landscape 2340x1080, Samsung Galaxy A34.
 
 ## Workflow Rules
 - Claude audits all new files before they are applied

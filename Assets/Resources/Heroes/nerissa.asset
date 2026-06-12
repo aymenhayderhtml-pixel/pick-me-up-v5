@@ -14,13 +14,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   HeroId: nerissa
   HeroName: Nerissa
-  BaseStarRank: 4
   BaseClass: 4
+  BaseStarRank: 4
+  HeroClass: 
   BaseHP: 4000
   BaseATK: 400
   BaseDEF: 200
-  PortraitSpritePath: Portraits/nerissa
+  BaseSPD: 0
+  PortraitSpritePath: HeroPortraits/nerissa_portrait
   CardFrameSpritePath: frame_4
-  HeroClass: 
-  Portrait: {fileID: 0}
+  Portrait: {fileID: 6517498735519688733, guid: 5ff0721bfd0390849a821b7f44693008, type: 3}
   LoreText: 

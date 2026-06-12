@@ -14,13 +14,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   HeroId: katio
   HeroName: Katio
-  BaseStarRank: 4
   BaseClass: 5
+  BaseStarRank: 4
+  HeroClass: 
   BaseHP: 4000
   BaseATK: 400
   BaseDEF: 200
-  PortraitSpritePath: Portraits/katio
+  BaseSPD: 0
+  PortraitSpritePath: HeroPortraits/katio_portrait
   CardFrameSpritePath: frame_4
-  HeroClass: 
-  Portrait: {fileID: 0}
+  Portrait: {fileID: 3727251207128967094, guid: 8559281cc1505cb458c43c413dd21190, type: 3}
   LoreText: 

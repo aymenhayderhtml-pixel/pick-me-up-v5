@@ -14,13 +14,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   HeroId: edith
   HeroName: Edith
-  BaseStarRank: 4
   BaseClass: 0
+  BaseStarRank: 4
+  HeroClass: 
   BaseHP: 4000
   BaseATK: 400
   BaseDEF: 200
-  PortraitSpritePath: Portraits/edith
+  BaseSPD: 0
+  PortraitSpritePath: HeroPortraits/edith_portrait
   CardFrameSpritePath: frame_4
-  HeroClass: 
-  Portrait: {fileID: 0}
+  Portrait: {fileID: -3196639853156551749, guid: 31539a976b2ebde4c8466c3184974f2e, type: 3}
   LoreText: 

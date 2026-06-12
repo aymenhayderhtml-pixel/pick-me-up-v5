@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0ee598ede3ba0b041bc6ed788b4d3d9f, type: 3}
+  m_Name: hero_lyra
+  m_EditorClassIdentifier: 
+  HeroId: hero_lyra
+  HeroName: Lyra
+  BaseClass: 1
+  BaseStarRank: 4
+  HeroClass: Mage
+  BaseHP: 230
+  BaseATK: 120
+  BaseDEF: 25
+  BaseSPD: 62
+  PortraitSpritePath: HeroPortraits/hero_lyra_portrait
+  CardFrameSpritePath: 
+  Portrait: {fileID: 5564293220581300999, guid: 679f8cc075a08624d9675c6bc27ad1ed, type: 3}
+  LoreText: Pyromancer of the Ashen Circle. She claims fire speaks to her, and it
+    always demands more fuel.

@@ -14,13 +14,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   HeroId: islat_han
   HeroName: Islat Han
-  BaseStarRank: 1
   BaseClass: 7
+  BaseStarRank: 1
+  HeroClass: 
   BaseHP: 12
   BaseATK: 14
   BaseDEF: 10
-  PortraitSpritePath: Portraits/islat_han
+  BaseSPD: 0
+  PortraitSpritePath: HeroPortraits/islat_han_portrait
   CardFrameSpritePath: frame_1
-  HeroClass: 
-  Portrait: {fileID: 0}
+  Portrait: {fileID: -8050033642786335780, guid: e815a86ee2dcde047a194aaf1d7b28f8, type: 3}
   LoreText: 

@@ -27,6 +27,7 @@ public class HeroInstance
     public int Morale;
     public long AcquiredTimestampTicks;
     public int PromotionRank;
+    public int Level = 1;          // 1-60; defaults to 1 for old saves
     public string WeaponId;
     public string ArmorId;
     public string AccessoryId;
@@ -51,6 +52,7 @@ public class HeroInstance
         HiddenPotential = UnityEngine.Random.Range(0f, 1f);
         SpecialOrgan = string.Empty;
         PromotionRank = 0;
+        Level = 1;
 
         // Assigned 40-60 random on creation
         Morale = UnityEngine.Random.Range(40, 61); 

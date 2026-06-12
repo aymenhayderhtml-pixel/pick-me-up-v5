@@ -14,13 +14,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   HeroId: aaron_delcut
   HeroName: Aaron Delcut
-  BaseStarRank: 1
   BaseClass: 7
+  BaseStarRank: 1
+  HeroClass: 
   BaseHP: 12
   BaseATK: 14
   BaseDEF: 10
-  PortraitSpritePath: Portraits/aaron_delcut
+  BaseSPD: 0
+  PortraitSpritePath: HeroPortraits/aaron_delcut_portrait
   CardFrameSpritePath: frame_1
-  HeroClass: 
-  Portrait: {fileID: 0}
+  Portrait: {fileID: 2030353799298590880, guid: aea096e1aebc3b14badca64dfe8c9323, type: 3}
   LoreText: 

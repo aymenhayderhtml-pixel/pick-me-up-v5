@@ -120,4 +120,38 @@ public static class LootRoller
             });
         }
     }
+
+    public static DungeonRewardResult RollBoss(DungeonDataSO dungeon, int floorLevel = 1)
+    {
+        DungeonRewardResult result = Roll(dungeon);
+
+        if (dungeon == null || dungeon.TypedLootTable == null) return result;
+
+        DungeonLootTableSO table = dungeon.TypedLootTable;
+
+        // Boss bonus
+        result.Gold += table.BossGoldBonus;
+        result.Exp += table.BossExpBonus;
+
+        // Boss loot with rarity scaling
+        System.Random rng = new System.Random();
+        foreach (DungeonLootTableSO.LootEntry entry in table.BossLoot)
+        {
+            if (entry == null) continue;
+            if (!((float)rng.NextDouble() <= entry.DropChance)) continue;
+
+            float rarityRoll = (float)rng.NextDouble();
+            int qty = entry.MinQuantity + rng.Next(0, entry.MaxQuantity - entry.MinQuantity + 1);
+
+            result.Items.Add(new DungeonRewardItem
+            {
+                ItemId = entry.ItemId,
+                DisplayName = string.IsNullOrEmpty(entry.FallbackName) ? entry.ItemId : entry.FallbackName,
+                Quantity = qty
+            });
+        }
+
+        return result;
+    }
+
 }

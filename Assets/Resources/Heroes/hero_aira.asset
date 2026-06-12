@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0ee598ede3ba0b041bc6ed788b4d3d9f, type: 3}
+  m_Name: hero_aira
+  m_EditorClassIdentifier: 
+  HeroId: hero_aira
+  HeroName: Aira
+  BaseClass: 1
+  BaseStarRank: 2
+  HeroClass: Mage
+  BaseHP: 210
+  BaseATK: 100
+  BaseDEF: 28
+  BaseSPD: 70
+  PortraitSpritePath: HeroPortraits/hero_aira_portrait
+  CardFrameSpritePath: 
+  Portrait: {fileID: 4466769633762638660, guid: 6b79d9666e211824e93d006d94879271, type: 3}
+  LoreText: Storm-caller still learning control. Every lightning strike is a conversation
+    with something vast and angry.

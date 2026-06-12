@@ -1,6 +1,4 @@
 using System.Collections.Generic;
-
-using System.Collections.Generic;
 using UnityEngine;
 
 public static class HeroPresentationUtility
@@ -29,17 +27,25 @@ public static class HeroPresentationUtility
         { "antaris", "Antaris" },
     };
 
-    private static readonly Dictionary<string, string> RoleBadges = new Dictionary<string, string>
+    private static readonly System.Collections.Generic.Dictionary<string, string> RoleBadges =
+        new System.Collections.Generic.Dictionary<string, string>
     {
-        { "Novice", "INITIATE" },
-        { "Vanguard", "FRONTLINE" },
-        { "Scout", "SKIRMISH" },
-        { "Mage", "ARCANE" },
-        { "Berserker", "FURY" },
-        { "Assassin", "HUNTER" },
-        { "Support", "AID" },
-        { "Specialist", "TACTIC" },
+        // Legacy class labels
+        { "Novice",      "INITIATE"  },
+        { "Vanguard",    "FRONTLINE" },
+        { "Scout",       "SKIRMISH"  },
+        { "Mage",        "ARCANE"    },
+        { "Berserker",   "FURY"      },
+        { "Assassin",    "HUNTER"    },
+        { "Support",     "AID"       },
+        { "Specialist",  "TACTIC"    },
+        // New combat roles
+        { "Warrior",     "MELEE"     },
+        { "Ranger",      "RANGE"     },
+        { "Healer",      "RESTORE"   },
+        { "Tank",        "GUARDIAN"  },
     };
+
 
     /// <summary>
     /// Resolves a HeroDefId to its canonical form.

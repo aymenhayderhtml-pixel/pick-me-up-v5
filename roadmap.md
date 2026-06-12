@@ -12,7 +12,7 @@ Focus:
 - Make the Master fantasy obvious across Hub, Roster, Summon, and Tower.
 
 Exit Criteria:
-- Roster feels readable on a small portrait screen.
+- Roster feels readable on a small landscape screen.
 - Hero presentation is consistent across all scenes.
 - No naming collisions confuse the player.
 
@@ -47,7 +47,7 @@ Timeline: Week 6-8
 
 Focus:
 - Make all major screens feel premium and ritualized.
-- Keep the layout portrait-first and thumb-reachable.
+- Keep the layout landscape-first and thumb-reachable.
 - Improve transitions so they feel intentional, not generic.
 
 Exit Criteria:
@@ -91,5 +91,5 @@ Exit Criteria:
 ## Assumptions
 - The current Unity 6 scene/service architecture remains the base.
 - No multiplayer, server-authority, or combat-engine rewrite is included.
-- The game stays portrait-first, mobile-first, and DOTween-free.
+- The game stays landscape-first, mobile-first, and DOTween-free.
 - Emotional clarity, consequence, and readability matter more than adding systems too early.

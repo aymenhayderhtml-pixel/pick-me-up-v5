@@ -22,18 +22,83 @@ public class HubView : MonoBehaviour
 
     private void Start()
     {
-        _currencyService = ServiceRegistry.Instance.Resolve<ICurrencyService>();
+        // Setup background first so it renders even if services aren't ready
+        SetupBackground();
+
+        if (ServiceRegistry.Instance != null)
+        {
+            _currencyService = ServiceRegistry.Instance.Resolve<ICurrencyService>();
+        }
 
         WireButton(rosterBtn, "Roster");
         WireButton(synthBtn, "SynthesisLab");
         WireButton(trainBtn, "Facilities");
         WireButton(towerBtn, "Tower");
         WireButton(summonBtn, "Summon");
-        WireButton(dungeonBtn, "Dungeon");
+        WireButton(dungeonBtn, "Formation");
         WireButton(inventoryBtn, "Inventory");
         WireButton(memorialBtn, "MemorialHall");
 
         RefreshUI();
+    }
+
+    private void SetupBackground()
+    {
+        GameObject bgGo = null;
+        foreach (Transform child in transform)
+        {
+            if (child.name == "Background")
+            {
+                bgGo = child.gameObject;
+                break;
+            }
+        }
+        if (bgGo == null)
+        {
+            bgGo = new GameObject("Background", typeof(RectTransform), typeof(Image));
+            bgGo.transform.SetParent(transform, false);
+        }
+        bgGo.transform.SetAsFirstSibling();
+        var rt = bgGo.GetComponent<RectTransform>();
+        rt.anchorMin = Vector2.zero;
+        rt.anchorMax = Vector2.one;
+        rt.offsetMin = Vector2.zero;
+        rt.offsetMax = Vector2.zero;
+
+        var img = bgGo.GetComponent<Image>();
+        img.raycastTarget = false;
+        Sprite loadedSprite = Resources.Load<Sprite>("UI/hub_background");
+        if (loadedSprite == null)
+        {
+            var tex = Resources.Load<Texture2D>("UI/hub_background");
+            if (tex != null)
+                loadedSprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100f);
+        }
+        if (loadedSprite != null)
+        {
+            img.sprite = loadedSprite;
+            img.type = Image.Type.Simple;
+            img.color = Color.white;
+            img.preserveAspect = false;
+        }
+        else
+        {
+            img.color = new Color(0.08f, 0.10f, 0.15f, 1f);
+        }
+
+        // Make CenterArea transparent so the background shows through
+        foreach (Transform child in transform)
+        {
+            if (child.name == "CenterArea")
+            {
+                var centerImg = child.GetComponent<Image>();
+                if (centerImg != null)
+                {
+                    centerImg.color = new Color(0f, 0f, 0f, 0f);
+                }
+                break;
+            }
+        }
     }
 
     private void OnEnable()

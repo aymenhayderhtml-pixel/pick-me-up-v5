@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0ee598ede3ba0b041bc6ed788b4d3d9f, type: 3}
+  m_Name: hero_sylas
+  m_EditorClassIdentifier: 
+  HeroId: hero_sylas
+  HeroName: Sylas
+  BaseClass: 2
+  BaseStarRank: 3
+  HeroClass: Ranger
+  BaseHP: 265
+  BaseATK: 95
+  BaseDEF: 32
+  BaseSPD: 78
+  PortraitSpritePath: HeroPortraits/hero_sylas_portrait
+  CardFrameSpritePath: 
+  Portrait: {fileID: -1255522720073655729, guid: 9f92b4d64222b264e9d2fa06a8813205, type: 3}
+  LoreText: Wind-runner who never touches the ground longer than a heartbeat. The
+    sky is his only loyalty.

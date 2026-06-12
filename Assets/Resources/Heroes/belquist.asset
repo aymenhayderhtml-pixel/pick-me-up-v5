@@ -14,13 +14,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   HeroId: belquist
   HeroName: Belquist
-  BaseStarRank: 4
   BaseClass: 3
+  BaseStarRank: 4
+  HeroClass: 
   BaseHP: 4000
   BaseATK: 400
   BaseDEF: 200
-  PortraitSpritePath: Portraits/belquist
+  BaseSPD: 0
+  PortraitSpritePath: HeroPortraits/belquist_portrait
   CardFrameSpritePath: frame_4
-  HeroClass: 
-  Portrait: {fileID: 0}
+  Portrait: {fileID: -4710708449964979164, guid: c5f227309a92fbb4e88b1b50b27b21d4, type: 3}
   LoreText: 

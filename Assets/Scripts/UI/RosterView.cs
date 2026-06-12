@@ -12,12 +12,12 @@ using UnityEngine.UI;
 /// </summary>
 public class RosterView : MonoBehaviour
 {
-    // ── Colors ──────────────────────────────────────────────────────────
-    private static readonly Color BgColor = new Color(0.039f, 0.047f, 0.078f);          // #0A0C14
-    private static readonly Color CardFill = new Color(0.102f, 0.118f, 0.180f);          // #1A1E2E
-    private static readonly Color AccentGold = new Color(0.784f, 0.659f, 0.294f);        // #C8A84B
-    private static readonly Color SteelBlue = new Color(0.478f, 0.690f, 0.800f);         // #7AB0CC
-    private static readonly Color Parchment = new Color(0.929f, 0.878f, 0.769f);         // #EDE0C4
+    // Colors
+    private static readonly Color BgColor = new Color(0.039f, 0.047f, 0.078f);
+    private static readonly Color CardFill = new Color(0.102f, 0.118f, 0.180f);
+    private static readonly Color AccentGold = new Color(0.784f, 0.659f, 0.294f);
+    private static readonly Color SteelBlue = new Color(0.478f, 0.690f, 0.800f);
+    private static readonly Color Parchment = new Color(0.929f, 0.878f, 0.769f);
     private static readonly Color TopBarBg = new Color(0.055f, 0.063f, 0.102f, 0.96f);
     private static readonly Color FilterActive = AccentGold;
     private static readonly Color FilterInactive = new Color(0.12f, 0.14f, 0.20f);
@@ -29,9 +29,9 @@ public class RosterView : MonoBehaviour
     private static readonly Color DividerColor = new Color(0.30f, 0.34f, 0.48f, 0.3f);
     private static readonly Color SeparatorGold = AccentGold;
 
-    private const float SplitX = 0.71f; // left/right panel boundary
+    private const float SplitX = 0.71f;
 
-    // ── Runtime refs ────────────────────────────────────────────────────
+    // Runtime refs
     private IRosterService _roster;
     private Transform _gridContent;
     private readonly List<RosterHeroCard> _spawnedCards = new List<RosterHeroCard>();
@@ -62,9 +62,7 @@ public class RosterView : MonoBehaviour
     private HeroInstance _selectedHero;
     private HeroDefinition _selectedDef;
 
-    // ════════════════════════════════════════════════════════════════════
-    //  ENTRY POINT
-    // ════════════════════════════════════════════════════════════════════
+    // ENTRY POINT
 
     private void Start()
     {
@@ -73,21 +71,17 @@ public class RosterView : MonoBehaviour
         RefreshGrid();
     }
 
-    // ════════════════════════════════════════════════════════════════════
-    //  UI CONSTRUCTION
-    // ════════════════════════════════════════════════════════════════════
+    // UI CONSTRUCTION
 
     private void BuildUI()
     {
-        // ── Full-screen dark background ─────────────────────────────────
+        // Full-screen dark background
         GameObject bg = CreateChild("Background", transform);
         Image bgImg = bg.AddComponent<Image>();
         bgImg.color = BgColor;
         Stretch(bg);
 
-        // ════════════════════════════════════════════════════════════════
-        //  LEFT PANEL (0,0 → 0.72,1)
-        // ════════════════════════════════════════════════════════════════
+        // LEFT PANEL (0,0 to 0.72,1)
 
         GameObject leftBg = CreateChild("LeftPanelBg", transform);
         Image leftBgImg = leftBg.AddComponent<Image>();
@@ -95,9 +89,7 @@ public class RosterView : MonoBehaviour
         leftBgImg.raycastTarget = false;
         SetAnchors(leftBg, Vector2.zero, new Vector2(SplitX, 1f));
 
-        // ════════════════════════════════════════════════════════════════
-        //  HERO GRID (direct child of Canvas — offset below top bars)
-        // ════════════════════════════════════════════════════════════════
+        // HERO GRID
 
         GameObject scrollObj = CreateChild("HeroGridScrollRect", transform);
         ScrollRect sr = scrollObj.AddComponent<ScrollRect>();
@@ -138,17 +130,13 @@ public class RosterView : MonoBehaviour
 
         _gridContent = content.transform;
 
-        // ════════════════════════════════════════════════════════════════
-        //  LEFT PANEL HEADER & FILTERS (drawn on top of ScrollRect)
-        // ════════════════════════════════════════════════════════════════
+        // LEFT PANEL HEADER & FILTERS
 
         GameObject leftPanel = CreateChild("LeftPanel", transform);
         SetAnchors(leftPanel, Vector2.zero, new Vector2(SplitX, 1f));
         BuildLeftPanel(leftPanel.transform);
 
-        // ════════════════════════════════════════════════════════════════
-        //  VERTICAL SEPARATOR
-        // ════════════════════════════════════════════════════════════════
+        // VERTICAL SEPARATOR
 
         GameObject separator = CreateChild("Separator", transform);
         Image sepImg = separator.AddComponent<Image>();
@@ -160,9 +148,7 @@ public class RosterView : MonoBehaviour
         sepRt.offsetMin = new Vector2(-0.5f, 0f);
         sepRt.offsetMax = new Vector2(0.5f, 0f);
 
-        // ════════════════════════════════════════════════════════════════
-        //  RIGHT PANEL (0.72,0 → 1,1)
-        // ════════════════════════════════════════════════════════════════
+        // RIGHT PANEL (0.72,0 to 1,1)
 
         GameObject rightPanel = CreateChild("RightPanel", transform);
         Image rpBg = rightPanel.AddComponent<Image>();
@@ -173,11 +159,10 @@ public class RosterView : MonoBehaviour
         BuildRightPanel(rightPanel.transform);
     }
 
-    // ── LEFT PANEL ──────────────────────────────────────────────────────
+    // LEFT PANEL
 
     private void BuildLeftPanel(Transform parent)
     {
-        // ── Top bar (title + back + count) ──────────────────────────────
         float topBarH = 80f / 1080f;
 
         GameObject topBar = CreateChild("TopBar", parent);
@@ -186,7 +171,6 @@ public class RosterView : MonoBehaviour
         topBarImg.raycastTarget = false;
         SetAnchors(topBar, new Vector2(0f, 1f - topBarH), Vector2.one);
 
-        // Title
         GameObject titleObj = CreateChild("Title", topBar.transform);
         TextMeshProUGUI titleTmp = titleObj.AddComponent<TextMeshProUGUI>();
         titleTmp.text = "ROSTER";
@@ -197,7 +181,6 @@ public class RosterView : MonoBehaviour
         titleTmp.raycastTarget = false;
         SetAnchors(titleObj, new Vector2(0.02f, 0f), new Vector2(0.18f, 1f));
 
-        // Hero count
         GameObject countObj = CreateChild("HeroCount", topBar.transform);
         _heroCountLabel = countObj.AddComponent<TextMeshProUGUI>();
         _heroCountLabel.fontSize = 18;
@@ -206,7 +189,6 @@ public class RosterView : MonoBehaviour
         _heroCountLabel.raycastTarget = false;
         SetAnchors(countObj, new Vector2(0.18f, 0f), new Vector2(0.35f, 1f));
 
-        // Back to Hub button
         GameObject backBtnObj = CreateChild("BackBtn", topBar.transform);
         Image backBtnImg = backBtnObj.AddComponent<Image>();
         backBtnImg.color = ButtonBack;
@@ -226,7 +208,6 @@ public class RosterView : MonoBehaviour
         backTmp.raycastTarget = false;
         Stretch(backLabel);
 
-        // ── Filter bar ──────────────────────────────────────────────────
         float filterH = 60f / 1080f;
         float filterTop = 1f - topBarH;
 
@@ -236,7 +217,6 @@ public class RosterView : MonoBehaviour
         filterBarImg.raycastTarget = false;
         SetAnchors(filterBar, new Vector2(0f, filterTop - filterH), new Vector2(1f, filterTop));
 
-        // Horizontal scroll for filter buttons
         GameObject filterScroll = CreateChild("FilterScroll", filterBar.transform);
         ScrollRect filterSr = filterScroll.AddComponent<ScrollRect>();
         filterSr.horizontal = true;
@@ -273,11 +253,10 @@ public class RosterView : MonoBehaviour
         }
     }
 
-    // ── RIGHT PANEL ─────────────────────────────────────────────────────
+    // RIGHT PANEL
 
     private void BuildRightPanel(Transform parent)
     {
-        // ── Placeholder (visible at start) ──────────────────────────────
         _placeholderObj = CreateChild("Placeholder", parent);
         Stretch(_placeholderObj);
 
@@ -291,7 +270,6 @@ public class RosterView : MonoBehaviour
         phTmp.raycastTarget = false;
         Stretch(phText);
 
-        // ── Detail content (hidden at start) ────────────────────────────
         _detailContent = CreateChild("DetailContent", parent);
         Stretch(_detailContent);
 
@@ -347,7 +325,7 @@ public class RosterView : MonoBehaviour
         divImg.raycastTarget = false;
         SetAnchors(divider, new Vector2(0.12f, 0.455f), new Vector2(0.88f, 0.458f));
 
-        // Stats block (ATK and DEF on line 1, HP on line 2, fontSize 20)
+        // Stats block
         GameObject statsObj = CreateChild("Stats", _detailContent.transform);
         _detailStats = statsObj.AddComponent<TextMeshProUGUI>();
         _detailStats.fontSize = 20;
@@ -365,14 +343,14 @@ public class RosterView : MonoBehaviour
         _detailMorale.raycastTarget = false;
         SetAnchors(moraleObj, new Vector2(0.08f, 0.29f), new Vector2(0.92f, 0.33f));
 
-        // Morale Bar Background (#1A1E2E)
+        // Morale Bar Background
         GameObject moraleBarBg = CreateChild("MoraleBarBg", _detailContent.transform);
         Image bgImg = moraleBarBg.AddComponent<Image>();
         bgImg.color = new Color(0.102f, 0.118f, 0.180f);
         bgImg.raycastTarget = false;
         SetAnchors(moraleBarBg, new Vector2(0.08f, 0.25f), new Vector2(0.92f, 0.27f));
 
-        // Morale Bar Fill (#3A8A4A)
+        // Morale Bar Fill
         GameObject moraleBarFill = CreateChild("MoraleBarFill", moraleBarBg.transform);
         Image fillImg = moraleBarFill.AddComponent<Image>();
         fillImg.color = new Color(0.227f, 0.541f, 0.290f);
@@ -392,7 +370,21 @@ public class RosterView : MonoBehaviour
         _detailTrait.raycastTarget = false;
         SetAnchors(traitObj, new Vector2(0.08f, 0.18f), new Vector2(0.92f, 0.23f));
 
-        // ── Bottom buttons ──────────────────────────────────────────────
+        // Equipment Section
+        GameObject equipSection = CreateChild("EquipmentSection", _detailContent.transform);
+        SetAnchors(equipSection, new Vector2(0.08f, 0.08f), new Vector2(0.92f, 0.17f));
+
+        // Weapon slot
+        GameObject weaponSlot = CreateEquipmentSlot(equipSection.transform, "Weapon", 0f);
+        // Armor slot
+        GameObject armorSlot = CreateEquipmentSlot(equipSection.transform, "Armor", 0.34f);
+        // Accessory slot
+        GameObject accessorySlot = CreateEquipmentSlot(equipSection.transform, "Accessory", 0.68f);
+
+        // Add EquipmentSlotView component — discovers its slots by name
+        _detailContent.AddComponent<EquipmentSlotView>();
+
+        // Bottom buttons
 
         // DISMISS (height 70px, fontSize 22)
         GameObject dismissObj = CreateChild("DismissBtn", _detailContent.transform);
@@ -445,12 +437,11 @@ public class RosterView : MonoBehaviour
 
         _backDetailBtn.SetActive(false);
 
-        // Start with placeholder visible, detail hidden
         _detailContent.SetActive(false);
         _placeholderObj.SetActive(true);
     }
 
-    // ── Filter button factory ───────────────────────────────────────────
+    // Filter button factory
 
     private void CreateFilterButton(string className, Transform parent)
     {
@@ -494,9 +485,7 @@ public class RosterView : MonoBehaviour
         _filterBorders[className] = borderImg;
     }
 
-    // ════════════════════════════════════════════════════════════════════
-    //  GRID LOGIC
-    // ════════════════════════════════════════════════════════════════════
+    // GRID LOGIC
 
     private void RefreshGrid()
     {
@@ -536,14 +525,12 @@ public class RosterView : MonoBehaviour
                 return HeroPresentationUtility.GetDisplayName(def, h.HeroDefId);
             }).ToList();
 
-        // Destroy old cards
         foreach (RosterHeroCard card in _spawnedCards)
         {
             if (card != null) Destroy(card.gameObject);
         }
         _spawnedCards.Clear();
 
-        // Spawn new cards
         foreach (HeroInstance hero in _filtered)
         {
             GameObject cardObj = new GameObject("HeroCard_" + hero.HeroDefId);
@@ -563,9 +550,7 @@ public class RosterView : MonoBehaviour
         }
     }
 
-    // ════════════════════════════════════════════════════════════════════
-    //  FILTER LOGIC
-    // ════════════════════════════════════════════════════════════════════
+    // FILTER LOGIC
 
     private void OnFilterClicked(string className)
     {
@@ -595,9 +580,7 @@ public class RosterView : MonoBehaviour
         ApplyFilter();
     }
 
-    // ════════════════════════════════════════════════════════════════════
-    //  DETAIL / RIGHT PANEL
-    // ════════════════════════════════════════════════════════════════════
+    // DETAIL / RIGHT PANEL
 
     private void OnCardTapped(HeroInstance hero)
     {
@@ -626,7 +609,6 @@ public class RosterView : MonoBehaviour
         string heroName = HeroPresentationUtility.GetDisplayName(_selectedDef, _selectedHero.HeroDefId);
         _detailName.text = heroName.ToUpperInvariant();
 
-        // Stars Row
         int stars = 1;
         if (_selectedHero != null) stars = _selectedHero.CurrentStarRank;
         else if (_selectedDef != null) stars = _selectedDef.BaseStarRank;
@@ -634,27 +616,22 @@ public class RosterView : MonoBehaviour
         Debug.Log("[RosterView] Hero star rank: " + stars + ", BaseStarRank: " + (_selectedDef != null ? _selectedDef.BaseStarRank.ToString() : "null"));
         _detailStars.text = string.Empty.PadRight(stars, '+');
 
-        // Class Label
         string classLabel = _selectedDef != null
             ? HeroPresentationUtility.GetRoleLabel(_selectedDef)
             : "UNKNOWN";
         _detailClass.text = classLabel.ToUpperInvariant();
 
-        // Morale Label
         _detailMorale.text = "Morale: " + _selectedHero.Morale + " / 100";
 
-        // Morale Bar Fill
         if (_moraleBarFill != null)
         {
             float fillPct = Mathf.Clamp01(_selectedHero.Morale / 100f);
             _moraleBarFill.anchorMax = new Vector2(fillPct, 1f);
         }
 
-        // Trait
         _detailTrait.text = "Trait: " + _selectedHero.Personality.ToString().ToUpperInvariant();
         _detailTrait.color = HeroColorUtility.GetTraitColor(_selectedHero.Personality);
 
-        // Stats
         int atkVal = _selectedDef != null ? _selectedDef.BaseATK : 0;
         int defVal = _selectedDef != null ? _selectedDef.BaseDEF : 0;
         int hpVal = _selectedDef != null ? _selectedDef.BaseHP : 0;
@@ -662,7 +639,6 @@ public class RosterView : MonoBehaviour
             "ATK " + atkVal + "    DEF " + defVal + "\n" +
             "HP  " + hpVal;
 
-        // Portrait
         _detailPortrait.sprite = null;
         _detailPortrait.color = GetRarityPlaceholderColor(_selectedHero.CurrentStarRank);
 
@@ -681,6 +657,10 @@ public class RosterView : MonoBehaviour
             _detailPortrait.sprite = _selectedDef.Portrait;
             _detailPortrait.color = _selectedHero.IsAlive ? Color.white : new Color(0.35f, 0.35f, 0.35f);
         }
+
+        // Refresh equipment display
+        EquipmentSlotView equipView = _detailContent.GetComponent<EquipmentSlotView>();
+        if (equipView != null) equipView.Setup(_selectedHero);
     }
 
     private void DeselectHero()
@@ -713,9 +693,7 @@ public class RosterView : MonoBehaviour
         ApplyFilter();
     }
 
-    // ════════════════════════════════════════════════════════════════════
-    //  UTILITY
-    // ════════════════════════════════════════════════════════════════════
+    // UTILITY
 
     private static GameObject CreateChild(string name, Transform parent)
     {
@@ -740,6 +718,56 @@ public class RosterView : MonoBehaviour
         rt.anchorMax = max;
         rt.offsetMin = Vector2.zero;
         rt.offsetMax = Vector2.zero;
+    }
+
+    private GameObject CreateEquipmentSlot(Transform parent, string slotName, float xNormalized)
+    {
+        GameObject slot = CreateChild("Slot_" + slotName, parent);
+        RectTransform rect = slot.GetComponent<RectTransform>();
+        rect.anchorMin = new Vector2(xNormalized, 0f);
+        rect.anchorMax = new Vector2(xNormalized + 0.3f, 1f);
+        rect.offsetMin = Vector2.zero;
+        rect.offsetMax = Vector2.zero;
+
+        Image bg = slot.AddComponent<Image>();
+        bg.color = new Color(0.12f, 0.14f, 0.2f, 0.9f);
+
+        // Icon
+        GameObject icon = CreateChild("Icon", slot.transform);
+        RectTransform iconRect = icon.GetComponent<RectTransform>();
+        iconRect.anchorMin = new Vector2(0.1f, 0.2f);
+        iconRect.anchorMax = new Vector2(0.9f, 0.9f);
+        iconRect.offsetMin = Vector2.zero;
+        iconRect.offsetMax = Vector2.zero;
+        Image iconImg = icon.AddComponent<Image>();
+        iconImg.color = new Color(0.1f, 0.1f, 0.15f, 1f);
+
+        // Name
+        GameObject nameObj = CreateChild("Name", slot.transform);
+        RectTransform nameRect = nameObj.GetComponent<RectTransform>();
+        nameRect.anchorMin = new Vector2(0f, 0f);
+        nameRect.anchorMax = new Vector2(1f, 0.25f);
+        nameRect.offsetMin = Vector2.zero;
+        nameRect.offsetMax = Vector2.zero;
+        TextMeshProUGUI nameTmp = nameObj.AddComponent<TextMeshProUGUI>();
+        nameTmp.text = slotName;
+        nameTmp.fontSize = 12;
+        nameTmp.alignment = TextAlignmentOptions.Center;
+        nameTmp.color = new Color(0.6f, 0.6f, 0.7f, 1f);
+
+        // Stats
+        GameObject statsObj = CreateChild("Stats", slot.transform);
+        RectTransform statsRect = statsObj.GetComponent<RectTransform>();
+        statsRect.anchorMin = new Vector2(0f, -0.3f);
+        statsRect.anchorMax = new Vector2(1f, 0f);
+        statsRect.offsetMin = Vector2.zero;
+        statsRect.offsetMax = Vector2.zero;
+        TextMeshProUGUI statsTmp = statsObj.AddComponent<TextMeshProUGUI>();
+        statsTmp.fontSize = 11;
+        statsTmp.alignment = TextAlignmentOptions.Center;
+        statsTmp.color = new Color(0.4f, 0.8f, 0.4f, 1f);
+
+        return slot;
     }
 
     private static Color GetRarityPlaceholderColor(int starRank)

@@ -1,5 +1,5 @@
 # Pick Me Up - Infinite Gacha
-## Unity 6 | Android Portrait 1080x2340 | Samsung Galaxy A34
+## Unity 6 | Android Landscape 2340x1080 | Samsung Galaxy A34
 
 ---
 
@@ -120,7 +120,7 @@ Implementation intent:
 Use this when asking another AI to research without using many tokens:
 
 ```text
-Research only the most useful current best practices for a Unity 6 Android portrait gacha RPG.
+Research only the most useful current best practices for a Unity 6 Android landscape gacha RPG.
 Keep it short and practical.
 Focus on:
 - mobile gacha UI patterns
@@ -144,4 +144,4 @@ Output format:
 - Prefer editor-generated UI over hand-wired inspector setup
 - Prefer scene names and service names that match the current codebase
 - If a change affects save data, preserve old saves and fill defaults safely
-- If a change affects UI, keep it portrait-first and mobile-friendly
+- If a change affects UI, keep it landscape-first and mobile-friendly

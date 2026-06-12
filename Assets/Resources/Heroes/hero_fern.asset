@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0ee598ede3ba0b041bc6ed788b4d3d9f, type: 3}
+  m_Name: hero_fern
+  m_EditorClassIdentifier: 
+  HeroId: hero_fern
+  HeroName: Fern
+  BaseClass: 3
+  BaseStarRank: 2
+  HeroClass: Healer
+  BaseHP: 270
+  BaseATK: 48
+  BaseDEF: 45
+  BaseSPD: 55
+  PortraitSpritePath: HeroPortraits/hero_fern_portrait
+  CardFrameSpritePath: 
+  Portrait: {fileID: 2006097135128280161, guid: 4b01e6ea468f73d43932618f557ba0f4, type: 3}
+  LoreText: Moss-witch of Kendert Forest. She grows medicines in her own hair and
+    speaks to roots.

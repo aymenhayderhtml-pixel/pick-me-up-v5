@@ -56,6 +56,11 @@ public class BootLoader : MonoBehaviour
         IFacilityService facilityService = new FacilityService();
         ServiceRegistry.Instance.Register<IFacilityService>(facilityService);
 
+        // 10a. Facility tick manager (passive income timer)
+        GameObject tickObj = new GameObject("FacilityTickManager");
+        tickObj.AddComponent<FacilityTickManager>();
+        DontDestroyOnLoad(tickObj);
+
         // 11. Register DungeonRewardService (must be registered BEFORE DungeonService so DungeonService picks it up in its constructor)
         IDungeonRewardService dungeonRewardService = new DungeonRewardService();
         ServiceRegistry.Instance.Register<IDungeonRewardService>(dungeonRewardService);
@@ -68,7 +73,17 @@ public class BootLoader : MonoBehaviour
         ISynthesizerService synthesizerService = new SynthesizerService();
         ServiceRegistry.Instance.Register<ISynthesizerService>(synthesizerService);
 
-        // 13. Load Hub scene with error handling
+        // 13. Register FormationService (in-memory, session-only)
+        IFormationService formationService = new FormationService();
+        ServiceRegistry.Instance.Register<IFormationService>(formationService);
+
+        // 14. Register CombatEngine (MonoBehaviour — needs a GameObject)
+        GameObject combatEngineObj = new GameObject("CombatEngine");
+        DontDestroyOnLoad(combatEngineObj);
+        CombatEngine combatEngine = combatEngineObj.AddComponent<CombatEngine>();
+        ServiceRegistry.Instance.Register<ICombatEngine>(combatEngine);
+
+        // 15. Load Hub scene with error handling
         try
         {
             SceneManager.LoadScene("Hub");

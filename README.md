@@ -19,7 +19,7 @@ Inspired by *Pick Me Up Infinite Gacha*, this game features summoning heroes, ma
 ## Tech Stack
 
 - **Engine:** Unity 6
-- **Platform:** Android (Portrait 1080x2340)
+- **Platform:** Android (Landscape 2340x1080)
 - **Target Device:** Samsung Galaxy A34
 - **Architecture:** ServiceRegistry-based dependency injection (no namespaces, no DOTween, 2D sprites only)
 

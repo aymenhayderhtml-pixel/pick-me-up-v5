@@ -14,13 +14,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   HeroId: jenna_cirai
   HeroName: Jenna Cirai
-  BaseStarRank: 1
   BaseClass: 7
+  BaseStarRank: 1
+  HeroClass: 
   BaseHP: 12
   BaseATK: 14
   BaseDEF: 10
-  PortraitSpritePath: Portraits/jenna_cirai
+  BaseSPD: 0
+  PortraitSpritePath: HeroPortraits/jenna_cirai_portrait
   CardFrameSpritePath: frame_1
-  HeroClass: 
-  Portrait: {fileID: 0}
+  Portrait: {fileID: -5338928788929787308, guid: 084358e48b6d798419db0532d358d236, type: 3}
   LoreText: 

@@ -14,13 +14,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   HeroId: dika
   HeroName: Dika
-  BaseStarRank: 1
   BaseClass: 7
+  BaseStarRank: 1
+  HeroClass: 
   BaseHP: 12
   BaseATK: 14
   BaseDEF: 10
-  PortraitSpritePath: Portraits/dika
+  BaseSPD: 0
+  PortraitSpritePath: HeroPortraits/dika_portrait
   CardFrameSpritePath: frame_1
-  HeroClass: 
-  Portrait: {fileID: 0}
+  Portrait: {fileID: 4275836781183699079, guid: daec789ed404a7c4c80b673af33e27ac, type: 3}
   LoreText: 

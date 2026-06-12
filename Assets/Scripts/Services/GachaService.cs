@@ -194,7 +194,14 @@ public class GachaService : IGachaService
             _gameState.Data.DiscoveredHeroIds = new List<string>();
 
         if (!string.IsNullOrEmpty(hero.HeroDefId) && !_gameState.Data.DiscoveredHeroIds.Contains(hero.HeroDefId))
+        {
             _gameState.Data.DiscoveredHeroIds.Add(hero.HeroDefId);
+
+            // Grant discovery reward
+            ICurrencyService currency = ServiceRegistry.Instance?.Resolve<ICurrencyService>();
+            IInventoryService inventory = ServiceRegistry.Instance?.Resolve<IInventoryService>();
+            MemorialHallReward.GrantDiscoveryReward(hero.HeroDefId, currency, inventory);
+        }
     }
 }
 

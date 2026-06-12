@@ -48,15 +48,21 @@ public static class HeroColorUtility
             return _classConfig.GetClassColor(heroClass);
         return heroClass switch
         {
-            HeroClass.Novice => new Color(0.50f, 0.50f, 0.50f),
-            HeroClass.Vanguard => new Color(0.90f, 0.30f, 0.30f),
-            HeroClass.Scout => new Color(0.20f, 0.70f, 0.60f),
-            HeroClass.Mage => new Color(0.30f, 0.30f, 0.90f),
-            HeroClass.Berserker => new Color(0.80f, 0.60f, 0.20f),
-            HeroClass.Assassin => new Color(0.60f, 0.20f, 0.70f),
-            HeroClass.Support => new Color(0.30f, 0.90f, 0.50f),
-            HeroClass.Specialist => new Color(0.20f, 0.70f, 0.80f),
-            _ => Color.gray
+            // Legacy
+            HeroClass.Novice      => new Color(0.50f, 0.50f, 0.50f),
+            HeroClass.Vanguard    => new Color(0.90f, 0.30f, 0.30f),
+            HeroClass.Scout       => new Color(0.20f, 0.70f, 0.60f),
+            HeroClass.Mage        => new Color(0.30f, 0.30f, 0.90f),
+            HeroClass.Berserker   => new Color(0.80f, 0.60f, 0.20f),
+            HeroClass.Assassin    => new Color(0.60f, 0.20f, 0.70f),
+            HeroClass.Support     => new Color(0.30f, 0.90f, 0.50f),
+            HeroClass.Specialist  => new Color(0.20f, 0.70f, 0.80f),
+            // New combat roles
+            HeroClass.Warrior     => new Color(0.90f, 0.30f, 0.30f),
+            HeroClass.Ranger      => new Color(0.20f, 0.75f, 0.45f),
+            HeroClass.Healer      => new Color(0.30f, 0.85f, 0.55f),
+            HeroClass.Tank        => new Color(0.65f, 0.65f, 0.20f),
+            _                     => Color.gray
         };
     }
 
